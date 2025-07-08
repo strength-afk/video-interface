@@ -298,4 +298,131 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(currentUser);
     }
+    
+    /**
+     * 管理员登录
+     * @param request 登录请求，包含用户名和密码
+     * @return 登录成功的管理员信息
+     * @throws IllegalArgumentException 如果用户名或密码错误或不是管理员
+     */
+    @Override
+    public User adminLogin(LoginRequest request) {
+        log.info("处理管理员登录请求: {}", request.getUsername());
+
+        try {
+            // 首先验证用户名和密码
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // 查找管理员用户
+            User admin = userRepository.findByUsernameAndRole(request.getUsername(), User.UserRole.ADMIN)
+                    .orElseThrow(() -> new IllegalArgumentException("该账号不是管理员账号"));
+            
+            // 检查账号状态
+            if (!admin.isEnabled()) {
+                throw new IllegalArgumentException("管理员账号已被禁用");
+            }
+            
+            if (!admin.isAccountNonLocked()) {
+                throw new IllegalArgumentException("管理员账号已被锁定");
+            }
+            
+            // 更新最后登录时间
+            admin.setLastLoginTime(LocalDateTime.now());
+            return userRepository.save(admin);
+        } catch (Exception e) {
+            log.error("管理员登录失败: {}", request.getUsername(), e);
+            throw new IllegalArgumentException("管理员登录失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 创建初始管理员账号
+     * @param username 管理员用户名
+     * @param password 管理员密码
+     * @param email 管理员邮箱
+     * @return 创建成功的管理员信息
+     * @throws IllegalArgumentException 如果参数无效或已存在管理员
+     */
+    @Override
+    @Transactional
+    public User createInitialAdmin(String username, String password, String email) {
+        log.info("开始创建初始管理员账号: {}", username);
+
+        // 检查是否已存在管理员
+        if (hasAdminUser()) {
+            throw new IllegalArgumentException("系统已存在管理员账号，无法重复创建");
+        }
+
+        // 验证参数
+        if (!StringUtils.hasText(username)) {
+            throw new IllegalArgumentException("管理员用户名不能为空");
+        }
+        if (username.length() < 3 || username.length() > 20) {
+            throw new IllegalArgumentException("管理员用户名长度必须在3-20个字符之间");
+        }
+        if (!username.matches("^[a-zA-Z0-9_]+$")) {
+            throw new IllegalArgumentException("管理员用户名只能包含字母、数字和下划线");
+        }
+
+        if (!StringUtils.hasText(password)) {
+            throw new IllegalArgumentException("管理员密码不能为空");
+        }
+        if (password.length() < 6 || password.length() > 20) {
+            throw new IllegalArgumentException("管理员密码长度必须在6-20个字符之间");
+        }
+
+        // 检查用户名是否已存在
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("管理员用户名已被使用");
+        }
+
+        // 检查邮箱是否已存在（如果提供了邮箱）
+        if (StringUtils.hasText(email) && userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("邮箱地址已被使用");
+        }
+
+        try {
+            // 创建管理员用户
+            User admin = User.builder()
+                    .username(username)
+                    .password(passwordEncoder.encode(password))
+                    .email(email)
+                    .status(User.UserStatus.ACTIVE)
+                    .role(User.UserRole.ADMIN)
+                    .build();
+
+            log.info("保存初始管理员到数据库");
+            User savedAdmin = userRepository.save(admin);
+            log.info("初始管理员创建成功: {}", savedAdmin.getUsername());
+            return savedAdmin;
+        } catch (Exception e) {
+            log.error("创建初始管理员失败: {}", e.getMessage(), e);
+            throw new RuntimeException("创建初始管理员失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 检查系统是否已有管理员
+     * @return true如果已存在管理员，否则返回false
+     */
+    @Override
+    public boolean hasAdminUser() {
+        return userRepository.existsByRole(User.UserRole.ADMIN);
+    }
+
+    /**
+     * 获取管理员数量
+     * @return 管理员账号数量
+     */
+    @Override
+    public long getAdminCount() {
+        return userRepository.countByRole(User.UserRole.ADMIN);
+    }
 } 

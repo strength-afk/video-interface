@@ -249,4 +249,96 @@ public class UserController {
             ));
         }
     }
+
+    /**
+     * 管理员登录
+     * @param loginRequest 登录请求
+     * @return JWT令牌和管理员信息
+     */
+    @PostMapping("/admin/login")
+    public ResponseEntity<?> adminLogin(@RequestBody LoginRequest loginRequest) {
+        try {
+            log.info("收到管理员登录请求: {}", loginRequest.getUsername());
+            User admin = userService.adminLogin(loginRequest);
+            String token = userService.generateToken(admin);
+            
+            log.info("管理员登录成功: {}", admin.getUsername());
+            return ResponseEntity.ok(Map.of(
+                "admin", admin,
+                "token", token,
+                "message", "管理员登录成功",
+                "role", admin.getRole().name()
+            ));
+        } catch (Exception e) {
+            log.error("管理员登录失败: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "管理员登录失败: " + e.getMessage(),
+                "status", "error"
+            ));
+        }
+    }
+
+    /**
+     * 创建初始管理员账号
+     * @param adminData 管理员账号数据
+     * @return 创建成功的管理员信息
+     */
+    @PostMapping("/admin/init")
+    public ResponseEntity<?> createInitialAdmin(@RequestBody Map<String, String> adminData) {
+        try {
+            log.info("收到创建初始管理员请求");
+            
+            // 检查是否已存在管理员
+            if (userService.hasAdminUser()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "系统已存在管理员账号，无法重复创建",
+                    "status", "error"
+                ));
+            }
+            
+            User admin = userService.createInitialAdmin(
+                adminData.get("username"),
+                adminData.get("password"),
+                adminData.get("email")
+            );
+            
+            log.info("初始管理员创建成功: {}", admin.getUsername());
+            return ResponseEntity.ok(Map.of(
+                "admin", admin,
+                "message", "初始管理员创建成功",
+                "status", "success"
+            ));
+        } catch (Exception e) {
+            log.error("创建初始管理员失败: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "创建初始管理员失败: " + e.getMessage(),
+                "status", "error"
+            ));
+        }
+    }
+
+    /**
+     * 检查管理员状态
+     * @return 管理员状态信息
+     */
+    @GetMapping("/admin/check-status")
+    public ResponseEntity<?> checkAdminStatus() {
+        try {
+            boolean hasAdmin = userService.hasAdminUser();
+            long adminCount = userService.getAdminCount();
+            
+            return ResponseEntity.ok(Map.of(
+                "hasAdmin", hasAdmin,
+                "adminCount", adminCount,
+                "needsInitialization", !hasAdmin,
+                "status", "success"
+            ));
+        } catch (Exception e) {
+            log.error("检查管理员状态失败: {}", e.getMessage());
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "检查管理员状态失败",
+                "status", "error"
+            ));
+        }
+    }
 } 

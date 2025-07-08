@@ -99,4 +99,34 @@ public interface UserService {
      * @return 更新后的用户信息
      */
     User updateCurrentUser(Map<String, String> userData);
+
+    /**
+     * 管理员登录
+     * @param request 登录请求，包含用户名和密码
+     * @return 登录成功的管理员信息
+     * @throws IllegalArgumentException 如果用户名或密码错误或不是管理员
+     */
+    User adminLogin(LoginRequest request);
+
+    /**
+     * 创建初始管理员账号
+     * @param username 管理员用户名
+     * @param password 管理员密码
+     * @param email 管理员邮箱
+     * @return 创建成功的管理员信息
+     * @throws IllegalArgumentException 如果参数无效或已存在管理员
+     */
+    User createInitialAdmin(String username, String password, String email);
+
+    /**
+     * 检查系统是否已有管理员
+     * @return true如果已存在管理员，否则返回false
+     */
+    boolean hasAdminUser();
+
+    /**
+     * 获取管理员数量
+     * @return 管理员账号数量
+     */
+    long getAdminCount();
 }
