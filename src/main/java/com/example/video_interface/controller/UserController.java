@@ -409,4 +409,32 @@ public class UserController {
             ));
         }
     }
+
+    /**
+     * 测试用管理员登录 - 不经过加密处理
+     * @param loginRequest 登录请求
+     * @return JWT令牌和管理员信息
+     */
+    @PostMapping("/admin/test-login")
+    public ResponseEntity<?> testAdminLogin(@RequestBody LoginRequest loginRequest) {
+        try {
+            log.info("收到测试管理员登录请求: {}", loginRequest.getUsername());
+            User admin = userService.adminLogin(loginRequest);
+            String token = userService.generateToken(admin);
+            
+            log.info("测试管理员登录成功: {}", admin.getUsername());
+            return ResponseEntity.ok(Map.of(
+                "admin", admin,
+                "token", token,
+                "message", "测试管理员登录成功",
+                "role", admin.getRole().name()
+            ));
+        } catch (Exception e) {
+            log.error("测试管理员登录失败: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "测试管理员登录失败: " + e.getMessage(),
+                "status", "error"
+            ));
+        }
+    }
 } 

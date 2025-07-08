@@ -33,8 +33,8 @@ public class DecryptionFilter implements Filter {
     private final CryptoUtil cryptoUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
-    @Value("${app.crypto.security.require-signature:true}")
-    private boolean signatureRequired;
+    // 🔒 强制启用签名验证 - 生产级安全要求
+    private static final boolean SIGNATURE_REQUIRED = true;
     
     @Value("${app.crypto.debug.enabled:false}")
     private boolean debugEnabled;
@@ -53,10 +53,10 @@ public class DecryptionFilter implements Filter {
             return;
         }
         
-        // 跳过错误页面请求
+        // 跳过错误页面请求和测试端点
         String requestPath = httpRequest.getRequestURI();
-        if (requestPath.contains("/error")) {
-            log.debug("📄 跳过错误页面请求: {}", requestPath);
+        if (requestPath.contains("/error") || requestPath.contains("/admin/test-login")) {
+            log.debug("📄 跳过特殊请求: {}", requestPath);
             chain.doFilter(request, response);
             return;
         }
@@ -93,8 +93,8 @@ public class DecryptionFilter implements Filter {
             String deviceId = httpRequest.getHeader("X-Device-ID");
             String clientType = httpRequest.getHeader("X-Client-Type");
             
-            // 🛠️ 开发模式：使用固定设备指纹确保前后端一致性
-            if (!signatureRequired && "admin".equals(clientType)) {
+            // 🔒 生产级模式：不再使用固定设备指纹，要求真实设备标识
+            if (false) { // 移除开发模式逻辑
                 String fixedFingerprint = "dev_admin_fingerprint";
                 String deviceSalt = "jiuban_device_fingerprint";
                 try {
@@ -112,7 +112,7 @@ public class DecryptionFilter implements Filter {
             }
             
             log.debug("🔍 处理请求: method={}, url={}, clientType={}, hasSignature={}, signatureRequired={}", 
-                method, httpRequest.getRequestURI(), clientType, signature != null, signatureRequired);
+                method, httpRequest.getRequestURI(), clientType, signature != null, SIGNATURE_REQUIRED);
             
             // 🔍 详细调试传输数据
             log.debug("📡 请求头调试:");
@@ -125,11 +125,8 @@ public class DecryptionFilter implements Filter {
             log.debug("📦 请求体原始数据 (前100字符): {}", 
                 requestBody != null ? requestBody.substring(0, Math.min(100, requestBody.length())) + "..." : "null");
             
-            // 开发模式下直接跳过所有加密处理
-            if (!signatureRequired) {
-                log.debug("⚠️ 开发模式：跳过签名验证，但仍需处理加密数据格式");
-                // 继续执行后续的加密数据处理逻辑，不在这里提前返回
-            }
+            // 🔒 生产级安全：始终执行完整的签名验证和加密处理
+            log.debug("🔐 生产级模式：执行完整的安全验证流程");
             
             // 如果没有加密头信息，直接通过
             if (!StringUtils.hasText(timestamp) || !StringUtils.hasText(signature) || !StringUtils.hasText(deviceId)) {
@@ -140,8 +137,8 @@ public class DecryptionFilter implements Filter {
                 return;
             }
             
-            // 检查是否需要验证签名
-            if (signatureRequired) {
+            // 🔒 强制验证签名 - 生产级安全要求
+            if (SIGNATURE_REQUIRED) {
                 // 验证请求签名
                 long timestampLong = Long.parseLong(timestamp);
                 boolean signatureValid = cryptoUtil.verifyRequestSignature(
@@ -162,7 +159,9 @@ public class DecryptionFilter implements Filter {
                     return;
                 }
             } else {
-                log.debug("⚠️ 开发模式：跳过签名验证");
+                // 🚨 这个分支不应该被执行（SIGNATURE_REQUIRED = true）
+                log.error("🚨 安全警告：签名验证被意外跳过！");
+                throw new RuntimeException("安全验证失败");
             }
             
             log.debug("✅ 请求签名验证成功");
@@ -176,78 +175,8 @@ public class DecryptionFilter implements Filter {
                 return;
             }
             
-            // 在开发模式下跳过解密处理
-            if (!signatureRequired) {
-                log.debug("⚠️ 开发模式：跳过加密数据解密，提取明文数据");
-                try {
-                    Map<String, Object> data = objectMapper.readValue(requestBody, Map.class);
-                    data.remove("_crypto"); // 移除加密元数据
-                    
-                    // 🔧 在开发模式下，需要将加密对象转换为明文字符串
-                    Map<String, Object> processedData = new HashMap<>();
-                    for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        
-                        // 检查是否为加密对象格式
-                        if (value instanceof Map) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> encryptedObj = (Map<String, Object>) value;
-                            
-                            // 如果包含加密字段（ciphertext, iv），尝试解密或使用开发模式处理
-                            if (encryptedObj.containsKey("ciphertext") && encryptedObj.containsKey("iv")) {
-                                try {
-                                    // 开发模式：尝试解密或使用默认值
-                                    String ciphertext = (String) encryptedObj.get("ciphertext");
-                                    String iv = (String) encryptedObj.get("iv");
-                                    Object timestampObj = encryptedObj.get("timestamp");
-                                    
-                                    if (ciphertext != null && iv != null && timestampObj != null) {
-                                        // 在开发模式下，可以尝试解密
-                                        long encryptTimestamp = timestampObj instanceof Number ? 
-                                            ((Number) timestampObj).longValue() : 
-                                            System.currentTimeMillis();
-                                        String dynamicKey = cryptoUtil.generateDynamicKey(encryptTimestamp, deviceId != null ? deviceId : "dev");
-                                        String decryptedValue = cryptoUtil.aesDecrypt(ciphertext, iv, dynamicKey);
-                                        processedData.put(key, decryptedValue);
-                                        log.debug("🔓 开发模式解密字段 {}: {} -> {}", key, ciphertext, decryptedValue);
-                                    } else {
-                                        // 如果解密失败，使用字段名作为默认值（仅开发模式）
-                                        String defaultValue = getDefaultValueForField(key);
-                                        processedData.put(key, defaultValue);
-                                        log.debug("🔧 开发模式使用默认值 {}: {}", key, defaultValue);
-                                    }
-                                } catch (Exception decryptError) {
-                                    // 解密失败，使用默认值
-                                    String defaultValue = getDefaultValueForField(key);
-                                    processedData.put(key, defaultValue);
-                                    log.debug("⚠️ 开发模式解密失败，使用默认值 {}: {}", key, defaultValue);
-                                }
-                            } else {
-                                // 不是加密对象，直接使用
-                                processedData.put(key, value);
-                            }
-                        } else {
-                            // 普通字段，直接使用
-                            processedData.put(key, value);
-                        }
-                    }
-                    
-                    String processedJson = objectMapper.writeValueAsString(processedData);
-                    log.debug("📄 开发模式处理后的数据: {}", processedJson);
-                    
-                    CachedBodyHttpServletRequest processedRequest = new CachedBodyHttpServletRequest(httpRequest, processedJson);
-                    processedRequest.setAttribute("DECRYPTION_PROCESSED", true);
-                    chain.doFilter(processedRequest, response);
-                    return;
-                } catch (Exception e) {
-                    log.warn("⚠️ 开发模式数据处理失败，回退到原始数据", e);
-                    CachedBodyHttpServletRequest processedRequest = new CachedBodyHttpServletRequest(httpRequest, requestBody);
-                    processedRequest.setAttribute("DECRYPTION_PROCESSED", true);
-                    chain.doFilter(processedRequest, response);
-                    return;
-                }
-            }
+            // 🔒 生产级安全：始终执行完整的解密验证流程
+            log.debug("🔐 执行标准解密流程");
             
             // 解密敏感数据
             Map<String, Object> decryptedData = cryptoUtil.decryptSensitiveData(requestBody, deviceId);

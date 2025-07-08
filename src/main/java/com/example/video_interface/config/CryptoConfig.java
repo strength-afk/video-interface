@@ -19,13 +19,13 @@ import java.util.Set;
 public class CryptoConfig {
 
     // 🔧 基础配置
-    @Value("${app.crypto.base-secret:jiuban_video_2024_security_key}")
+    @Value("${app.crypto.base-secret:K9mN7pQ2vX8bE4wR6jL3nA5sD9gH2kP7uY1tI6oE8rQ4mN9vX3bK7sA2wE5gL8pU}")
     private String baseSecret;
 
-    @Value("${app.crypto.time-window:300000}")
-    private long timeWindow; // 5分钟时间窗口
+    @Value("${app.crypto.time-window:180000}")
+    private long timeWindow; // 3分钟时间窗口，与前端保持一致
 
-    @Value("${app.crypto.device-salt:jiuban_device_fingerprint}")
+    @Value("${app.crypto.device-salt:R7mK3nP9wE6bA2sD4vX8jL5oI1uY7tQ9}")
     private String deviceSalt;
 
     // 🔐 加密算法配置

@@ -5,7 +5,9 @@ import com.example.video_interface.dto.RegisterRequest;
 import com.example.video_interface.model.User;
 import com.example.video_interface.repository.UserRepository;
 import com.example.video_interface.security.JwtTokenProvider;
+import com.example.video_interface.service.LoginSecurityService;
 import com.example.video_interface.service.UserService;
+import com.example.video_interface.util.RequestContextUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final RedisTemplate<String, String> redisTemplate;
+    private final LoginSecurityService loginSecurityService;
 
     /**
      * 用户注册
@@ -307,10 +310,42 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User adminLogin(LoginRequest request) {
-        log.info("处理管理员登录请求: {}", request.getUsername());
+        log.info("🔐 处理管理员登录请求: {}", request.getUsername());
+        
+        // 获取客户端IP地址
+        String clientIp = RequestContextUtil.getClientIpAddress();
+        log.debug("📍 客户端IP: {}", clientIp);
+
+        // 🛡️ 检查IP是否被锁定
+        if (loginSecurityService.isIpLocked(clientIp)) {
+            log.warn("🚫 IP已被锁定，拒绝登录: {} (IP: {})", request.getUsername(), clientIp);
+            throw new IllegalArgumentException("IP地址已被锁定，请稍后再试");
+        }
+
+        // 查找用户（先查找用户，即使密码错误也要记录失败次数）
+        User admin = null;
+        try {
+            admin = userRepository.findByUsernameAndRole(request.getUsername(), User.UserRole.ADMIN)
+                    .orElse(null);
+        } catch (Exception e) {
+            log.error("查找管理员用户失败: {}", e.getMessage());
+        }
+
+        // 🔍 检查账户锁定状态（如果用户存在）
+        if (admin != null) {
+            LoginSecurityService.LockCheckResult lockResult = loginSecurityService.checkAccountLock(admin);
+            if (lockResult.isLocked()) {
+                String message = lockResult.getReason();
+                if (lockResult.getUnlockTime() != null) {
+                    message += "，预计解锁时间: " + lockResult.getUnlockTime();
+                }
+                log.warn("🔒 账户已锁定: {} - {}", request.getUsername(), message);
+                throw new IllegalArgumentException(message);
+            }
+        }
 
         try {
-            // 首先验证用户名和密码
+            // 🔐 验证用户名和密码
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
@@ -320,25 +355,73 @@ public class UserServiceImpl implements UserService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 查找管理员用户
-            User admin = userRepository.findByUsernameAndRole(request.getUsername(), User.UserRole.ADMIN)
-                    .orElseThrow(() -> new IllegalArgumentException("该账号不是管理员账号"));
+            // 再次确认是管理员账户（防止数据变更）
+            if (admin == null) {
+                admin = userRepository.findByUsernameAndRole(request.getUsername(), User.UserRole.ADMIN)
+                        .orElseThrow(() -> new IllegalArgumentException("该账号不是管理员账号"));
+            }
             
             // 检查账号状态
             if (!admin.isEnabled()) {
+                log.warn("❌ 管理员账号已被禁用: {}", request.getUsername());
                 throw new IllegalArgumentException("管理员账号已被禁用");
             }
+
+            // ✅ 登录成功，记录成功日志并重置失败次数
+            loginSecurityService.recordLoginSuccess(admin, clientIp);
             
-            if (!admin.isAccountNonLocked()) {
-                throw new IllegalArgumentException("管理员账号已被锁定");
+            // 更新最后登录时间和IP
+            admin.setLastLoginTime(LocalDateTime.now());
+            admin.setLastLoginIp(clientIp);
+            
+            log.info("✅ 管理员登录成功: {} (IP: {})", admin.getUsername(), clientIp);
+            return userRepository.save(admin);
+            
+        } catch (Exception e) {
+            log.error("🚨 管理员登录失败: {} (IP: {}) - 原因: {}", 
+                request.getUsername(), clientIp, e.getMessage());
+            
+            // 🔍 构造详细的错误信息
+            String errorMessage = "管理员登录失败";
+            
+            try {
+                // 📝 记录登录失败（即使用户不存在也要记录IP失败）
+                boolean accountLocked = loginSecurityService.recordLoginFailure(admin, clientIp);
+                
+                // 如果是密码错误且用户存在，提供剩余尝试次数信息
+                if (admin != null && e.getMessage().contains("Bad credentials")) {
+                    // 重新查询用户以获取最新的失败次数
+                    admin = userRepository.findByUsernameAndRole(request.getUsername(), User.UserRole.ADMIN)
+                            .orElse(admin);
+                    
+                    int remainingAttempts = loginSecurityService.getRemainingAttempts(admin);
+                    if (remainingAttempts > 0 && !accountLocked) {
+                        errorMessage = String.format("密码错误，您还有 %d 次尝试机会", remainingAttempts);
+                    } else if (accountLocked) {
+                        errorMessage = "登录失败次数过多，账户已被锁定";
+                    } else {
+                        errorMessage = "密码错误";
+                    }
+                } else if (admin == null) {
+                    // 用户不存在
+                    errorMessage = "该账号不是管理员账号";
+                } else {
+                    // 其他错误
+                    errorMessage = e.getMessage();
+                }
+            } catch (Exception recordException) {
+                log.error("记录登录失败时出错: {}", recordException.getMessage());
+                // 如果记录失败，使用通用错误消息
+                if (admin != null && e.getMessage().contains("Bad credentials")) {
+                    errorMessage = "密码错误";
+                } else if (admin == null) {
+                    errorMessage = "该账号不是管理员账号";
+                } else {
+                    errorMessage = e.getMessage();
+                }
             }
             
-            // 更新最后登录时间
-            admin.setLastLoginTime(LocalDateTime.now());
-            return userRepository.save(admin);
-        } catch (Exception e) {
-            log.error("管理员登录失败: {}", request.getUsername(), e);
-            throw new IllegalArgumentException("管理员登录失败: " + e.getMessage());
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 

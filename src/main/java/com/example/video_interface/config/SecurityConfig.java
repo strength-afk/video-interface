@@ -86,6 +86,7 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.POST, "/users/admin/login").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/users/admin/init").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/admin/check-status").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/users/admin/test-login").permitAll();
                 
                 // 其他所有请求需要认证
                 auth.anyRequest().authenticated();

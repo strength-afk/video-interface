@@ -83,4 +83,42 @@ public class RequestContextUtil {
             })
             .orElseThrow(() -> new IllegalStateException("No current request found"));
     }
+
+    /**
+     * 获取客户端真实IP地址 - 静态方法
+     * 用于登录安全服务等需要获取IP的场景
+     */
+    public static String getClientIpAddress() {
+        try {
+            HttpServletRequest request = getRequestFromContext()
+                .orElse(null);
+            
+            if (request == null) {
+                log.warn("⚠️ 无法获取当前请求上下文，使用默认IP");
+                return "unknown";
+            }
+            
+            // 检查各种可能的IP头
+            for (String header : IP_HEADERS) {
+                String ip = request.getHeader(header);
+                if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                    // 处理多级代理的情况，取第一个IP
+                    if (ip.contains(",")) {
+                        ip = ip.split(",")[0].trim();
+                    }
+                    log.debug("🌐 从头部 {} 获取到IP: {}", header, ip);
+                    return ip;
+                }
+            }
+            
+            // 如果没有找到代理IP，使用远程地址
+            String remoteAddr = request.getRemoteAddr();
+            log.debug("🌐 使用远程地址: {}", remoteAddr);
+            return remoteAddr != null ? remoteAddr : "unknown";
+            
+        } catch (Exception e) {
+            log.error("❌ 获取客户端IP地址失败: {}", e.getMessage());
+            return "unknown";
+        }
+    }
 } 

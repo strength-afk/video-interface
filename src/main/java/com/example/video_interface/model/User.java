@@ -105,6 +105,22 @@ public class User implements UserDetails {
     @Comment("账户锁定原因")
     private String lockReason;
 
+    @Column(name = "failed_login_attempts")
+    @Comment("连续登录失败次数")
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "last_failed_login_time")
+    @Comment("最后一次登录失败时间")
+    private LocalDateTime lastFailedLoginTime;
+
+    @Column(name = "lock_time")
+    @Comment("账户锁定时间")
+    private LocalDateTime lockTime;
+
+    @Column(name = "unlock_time")
+    @Comment("账户自动解锁时间")
+    private LocalDateTime unlockTime;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     @Comment("创建时间")
@@ -135,6 +151,7 @@ public class User implements UserDetails {
         if (watchTime == null) watchTime = 0L;
         if (role == null) role = UserRole.USER;
         if (status == null) status = UserStatus.ACTIVE;
+        if (failedLoginAttempts == null) failedLoginAttempts = 0;
     }
 
     @PreUpdate
