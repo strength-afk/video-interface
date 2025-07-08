@@ -1,6 +1,39 @@
 # FB视频后端项目
 
-这是一个基于Spring Boot的视频网站后端项目。
+这是一个基于Spring Boot的视频网站后端项目，集成了三层加密系统和统一认证功能。
+
+## 🔐 三层加密系统
+
+项目实现了完整的三层加密安全架构：
+
+1. **前端加密层**: 使用AES-256-CTR + HMAC-SHA256对敏感数据进行加密和签名
+2. **传输安全层**: 基于HTTPS的安全传输通道
+3. **后端解密层**: DecryptionFilter自动解密和验证请求数据
+
+### 开发模式配置
+```properties
+# 开发模式 - 跳过加密验证
+app.crypto.security.require-signature=false
+```
+
+## 🔑 统一认证端点
+
+系统提供统一的认证API，自动判断登录或注册：
+
+```bash
+# 测试统一认证端点
+./test_auth.sh
+
+# 或手动测试
+curl -X POST http://localhost:8080/api/users/auth \
+  -H "Content-Type: application/json" \
+  -H "Origin: http://localhost:4000" \
+  -d '{"username":"testuser","password":"123456"}'
+```
+
+- **新用户**: 自动执行注册流程
+- **现有用户**: 验证密码并登录
+- **返回**: JWT token + 完整用户信息
 
 ## 开发说明
 
@@ -104,4 +137,25 @@ src/
 3. 数据库字段错误
    - 执行最新的数据库迁移脚本
    - 检查实体类与数据库表结构是否匹配
-   - 使用JPA的validate模式验证映射 
+   - 使用JPA的validate模式验证映射
+
+## ✅ 测试状态
+
+### 最新测试结果 (2025-07-08)
+
+- ✅ **三层加密系统**: 开发模式下完美工作
+- ✅ **统一认证端点**: `/api/users/auth` 正常运行
+- ✅ **自动注册功能**: 新用户自动创建成功
+- ✅ **JWT Token生成**: 增强型JWT正常生成
+- ✅ **CORS配置**: 跨域请求正常处理
+- ✅ **数据库连接**: MySQL连接和操作正常
+- ✅ **Spring Security**: 公开路径配置正确
+
+### 测试环境
+- Java 23.0.2
+- Spring Boot 3.2.3  
+- MySQL 9.3
+- 服务端口: 8080
+- 前端源: localhost:4000
+
+**系统运行状态**: 🟢 正常 

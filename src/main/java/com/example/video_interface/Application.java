@@ -12,7 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
     "com.example.video_interface.controller",
     "com.example.video_interface.service",
     "com.example.video_interface.security",
-    "com.example.video_interface.config"
+    "com.example.video_interface.config",
+    "com.example.video_interface.util",
+    "com.example.video_interface.filter"
 })
 public class Application {
     public static void main(String[] args) {

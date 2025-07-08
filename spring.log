@@ -1,0 +1,385 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2025-07-09 00:48:28 [main] INFO  c.e.video_interface.Application - Starting Application v0.0.1-SNAPSHOT using Java 20.0.2 with PID 36897 (/Users/zhangjin/fb_video/video-interface/target/video-interface-0.0.1-SNAPSHOT.jar started by zhangjin in /Users/zhangjin/fb_video/video-interface)
+2025-07-09 00:48:28 [main] DEBUG c.e.video_interface.Application - Running with Spring Boot v3.2.3, Spring v6.1.4
+2025-07-09 00:48:28 [main] INFO  c.e.video_interface.Application - No active profile set, falling back to 1 default profile: "default"
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 76 ms. Found 1 JPA repository interface.
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.video_interface.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-07-09 00:48:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2025-07-09 00:48:29 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-07-09 00:48:29 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-09 00:48:29 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-07-09 00:48:29 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-07-09 00:48:29 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 903 ms
+2025-07-09 00:48:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-07-09 00:48:30 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@370c9018
+2025-07-09 00:48:30 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-07-09 00:48:30 [main] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 9.22.3 by Redgate
+2025-07-09 00:48:30 [main] INFO  o.f.c.i.license.VersionPrinter - See release notes here: https://rd.gt/416ObMi
+2025-07-09 00:48:30 [main] INFO  o.f.c.i.license.VersionPrinter - 
+2025-07-09 00:48:30 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/fb_video (MySQL 9.3)
+2025-07-09 00:48:30 [main] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.0.
+2025-07-09 00:48:30 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 4 migrations (execution time 00:00.012s)
+2025-07-09 00:48:30 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema `fb_video`: 5
+2025-07-09 00:48:30 [main] WARN  o.f.core.internal.command.DbMigrate - outOfOrder mode is active. Migration of schema `fb_video` may not be reproducible.
+2025-07-09 00:48:30 [main] INFO  o.f.core.internal.command.DbMigrate - Schema `fb_video` is up to date. No migration necessary.
+2025-07-09 00:48:30 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-09 00:48:30 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2025-07-09 00:48:30 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-07-09 00:48:30 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-09 00:48:30 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-07-09 00:48:30 [main] WARN  org.hibernate.orm.deprecation - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-09 00:48:30 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-07-09 00:48:30 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-09 00:48:30 [main] DEBUG c.e.v.security.JwtTokenProvider - Initializing enhanced JWT security with secret length: 63
+2025-07-09 00:48:30 [main] DEBUG c.e.v.security.JwtTokenProvider - Enhanced JWT security initialized successfully
+2025-07-09 00:48:30 [main] DEBUG c.e.v.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig - 🔐 加密配置初始化完成:
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 基础密钥长度: 30 字符
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 时间窗口: 300000 ms
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ AES算法: AES/CTR/NoPadding
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ HMAC算法: HmacSHA256
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 哈希算法: SHA-256
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ JWT设备绑定: true
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ JWT额外加密: true
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ H5加密启用: true
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 管理端加密启用: true
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 移动端加密启用: true
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 要求签名验证: true
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 严格设备绑定: false
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig -   └─ 敏感字段数量: 15
+2025-07-09 00:48:31 [main] WARN  c.e.v.config.CryptoConfig - ⚠️ 基础密钥长度不足32字符，建议使用更强的密钥
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.CryptoConfig - ✅ 加密配置安全性检查完成
+2025-07-09 00:48:31 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-09 00:48:31 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 15 mappings in 'requestMappingHandlerMapping'
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.SecurityConfig - 配置安全过滤链
+2025-07-09 00:48:31 [main] INFO  c.e.v.config.SecurityConfig - 配置CORS规则，允许的源：[http://localhost:5173, http://localhost:3000, http://localhost:4000, http://localhost:4001, http://localhost:8080]
+2025-07-09 00:48:31 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@73ccdfc1, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@18d8da77, org.springframework.security.web.context.SecurityContextHolderFilter@6c289070, org.springframework.security.web.header.HeaderWriterFilter@4b02dc4e, org.springframework.web.filter.CorsFilter@502dc93a, org.springframework.security.web.authentication.logout.LogoutFilter@538fb761, com.example.video_interface.filter.DecryptionFilter@5b6ec94a, com.example.video_interface.security.JwtAuthenticationFilter@22657db1, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2e41e0c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2e214d39, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@486d1868, org.springframework.security.web.session.SessionManagementFilter@738ed8d3, org.springframework.security.web.access.ExceptionTranslationFilter@2524f9bf, org.springframework.security.web.access.intercept.AuthorizationFilter@1a9e2c3b]
+2025-07-09 00:48:31 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-07-09 00:48:31 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-07-09 00:48:31 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-07-09 00:48:31 [main] INFO  c.e.video_interface.Application - Started Application in 2.79 seconds (process running for 3.133)
+2025-07-09 00:50:13 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-09 00:50:13 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@28592982
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@174e5929
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-07-09 00:50:13 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 🔍 读取到请求体: length=371, content={"username":{"ciphertext":"PdcWPtg=","iv":"ytJwIWOZCUr65p0I2lN/ng==","timestamp":1751997013904},"password":{"ciphertext":"Ybbaa+Bht1Q=","iv":"IWARq3RRRI5oD9/TPPFzeg==","timestamp":1751997013904},"captcha":"","_crypto":{"encrypted":true,"fields":["password","username"],"timestamp":1751997013904,"version":"1.0","signature":"XAbd44v3qr4kKQrtDcEjJ8Bd85Qp2E9oZH+bkEl2puk="}}
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=admin, hasSignature=true, signatureRequired=true
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 📡 请求头调试:
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Type: application/json
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Length: 371
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter -   - X-Timestamp: 1751997013904
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter -   - X-Signature: 9Rl7jlq1AyWsFTlrlR1GIvzKBQ7FgRiJf/A+9u151uo=
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter -   - X-Device-ID: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter -   - X-Client-Type: admin
+2025-07-09 00:50:13 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 📦 请求体原始数据 (前100字符): {"username":{"ciphertext":"PdcWPtg=","iv":"ytJwIWOZCUr65p0I2lN/ng==","timestamp":1751997013904},"pas...
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil - 🔑 动态密钥生成详情:
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间戳: 1751997013904
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间窗口: 5839990
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 基础密钥: jiuban_video_2024_security_key
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 设备指纹: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 密钥材料: jiuban_video_2024_security_key|5839990|d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 动态密钥完整: e23481e39b219c785333dc426e8153e8edad2f571491513234d6042c987e9a8d
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil - 🔧 URL路径处理:
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
+2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-09 00:50:14 [http-nio-8080-exec-1] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+2025-07-09 00:50:14 [http-nio-8080-exec-1] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Caused by: java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	... 23 common frames omitted
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 🔍 读取到请求体: length=371, content={"username":{"ciphertext":"rD5blUY=","iv":"bzYLfplrCy0yOs9Wo0ZaQg==","timestamp":1751997254492},"password":{"ciphertext":"IvqfRk8duXA=","iv":"E1HpMcBpuIXcTo6sIxxpAQ==","timestamp":1751997254492},"captcha":"","_crypto":{"encrypted":true,"fields":["password","username"],"timestamp":1751997254492,"version":"1.0","signature":"WoCi9Sd+pNEFyXXQYa76U1OVsSnul48xVHrVG+DYTJc="}}
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=admin, hasSignature=true, signatureRequired=true
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 📡 请求头调试:
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Type: application/json
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Length: 371
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter -   - X-Timestamp: 1751997254492
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter -   - X-Signature: eUg4DoKuRvHCmwlp7SS+4b24IgLMm/lPDJHobuG1rXA=
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter -   - X-Device-ID: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter -   - X-Client-Type: admin
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 📦 请求体原始数据 (前100字符): {"username":{"ciphertext":"rD5blUY=","iv":"bzYLfplrCy0yOs9Wo0ZaQg==","timestamp":1751997254492},"pas...
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil - 🔑 动态密钥生成详情:
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间戳: 1751997254492
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间窗口: 5839990
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 基础密钥: jiuban_video_2024_security_key
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 设备指纹: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 密钥材料: jiuban_video_2024_security_key|5839990|d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 动态密钥完整: e23481e39b219c785333dc426e8153e8edad2f571491513234d6042c987e9a8d
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil - 🔧 URL路径处理:
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-09 00:54:14 [http-nio-8080-exec-2] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+2025-07-09 00:54:14 [http-nio-8080-exec-2] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Caused by: java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	... 23 common frames omitted
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter - 🔍 读取到请求体: length=371, content={"username":{"ciphertext":"TX8bCe8=","iv":"ofn/YpPdYLVsiav6R7iGDg==","timestamp":1751997265970},"password":{"ciphertext":"SENzF0d513U=","iv":"4la6OHk/pynAopEsq/u8cA==","timestamp":1751997265970},"captcha":"","_crypto":{"encrypted":true,"fields":["password","username"],"timestamp":1751997265970,"version":"1.0","signature":"wlhkQ5cDylxSiIQEUQcofYJQfN0Y5BdKKxVlBV9fLgc="}}
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=admin, hasSignature=true, signatureRequired=true
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter - 📡 请求头调试:
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Type: application/json
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Length: 371
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter -   - X-Timestamp: 1751997265970
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter -   - X-Signature: ERvwmmuta6sSRq84VjXjEdp+corU6rWFRLf/NO/MNOM=
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter -   - X-Device-ID: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter -   - X-Client-Type: admin
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter - 📦 请求体原始数据 (前100字符): {"username":{"ciphertext":"TX8bCe8=","iv":"ofn/YpPdYLVsiav6R7iGDg==","timestamp":1751997265970},"pas...
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil - 🔑 动态密钥生成详情:
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间戳: 1751997265970
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间窗口: 5839990
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 基础密钥: jiuban_video_2024_security_key
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 设备指纹: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 密钥材料: jiuban_video_2024_security_key|5839990|d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 动态密钥完整: e23481e39b219c785333dc426e8153e8edad2f571491513234d6042c987e9a8d
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil - 🔧 URL路径处理:
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
+2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-09 00:54:25 [http-nio-8080-exec-3] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+2025-07-09 00:54:25 [http-nio-8080-exec-3] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Caused by: java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	... 23 common frames omitted
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 🔍 读取到请求体: length=371, content={"username":{"ciphertext":"/OwOEzA=","iv":"3kYa8vEPn7eynIboFutVkA==","timestamp":1751997582171},"password":{"ciphertext":"/s+dKRqUK7M=","iv":"w9GBP2NV7xEwiM0GhiMevg==","timestamp":1751997582171},"captcha":"","_crypto":{"encrypted":true,"fields":["password","username"],"timestamp":1751997582171,"version":"1.0","signature":"othgdg2JAN+zWP0t7QonJ3KL2fsnqNnCeAFDCWRZT8g="}}
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=admin, hasSignature=true, signatureRequired=true
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 📡 请求头调试:
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Type: application/json
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter -   - Content-Length: 371
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter -   - X-Timestamp: 1751997582171
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter -   - X-Signature: QXo6cN2cr/tlJ1HvnfCOesbtiQZjfgzlReZTUrjxiNE=
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter -   - X-Device-ID: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter -   - X-Client-Type: admin
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 📦 请求体原始数据 (前100字符): {"username":{"ciphertext":"/OwOEzA=","iv":"3kYa8vEPn7eynIboFutVkA==","timestamp":1751997582171},"pas...
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil - 🔑 动态密钥生成详情:
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间戳: 1751997582171
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 时间窗口: 5839991
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 基础密钥: jiuban_video_2024_security_key
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 设备指纹: d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 密钥材料: jiuban_video_2024_security_key|5839991|d9eac28a881bcf08ce14f0a5d1a6ddc7
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 动态密钥完整: 43645d944fff4b336579dfe3f75d44c333ee38c04897d37b867091a6611db990
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil - 🔧 URL路径处理:
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-09 00:59:42 [http-nio-8080-exec-4] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+2025-07-09 00:59:42 [http-nio-8080-exec-4] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Caused by: java.lang.RuntimeException: 数据签名验证失败
+	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
+	... 23 common frames omitted

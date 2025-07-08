@@ -54,6 +54,74 @@ public class UserController {
     }
 
     /**
+     * 统一认证端点 - 处理登录和注册
+     * 根据用户是否存在自动判断是登录还是注册
+     * @param authRequest 认证请求（包含用户名和密码）
+     * @return JWT令牌和用户信息
+     */
+    @PostMapping("/auth")
+    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> authRequest) {
+        try {
+            String username = authRequest.get("username");
+            String password = authRequest.get("password");
+            
+            log.info("收到统一认证请求: {}", username);
+            
+            if (username == null || password == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "用户名和密码不能为空",
+                    "status", "error"
+                ));
+            }
+            
+            // 检查用户是否已存在
+            boolean userExists = userService.existsByUsername(username);
+            
+            if (userExists) {
+                // 用户存在，执行登录
+                log.info("用户已存在，执行登录: {}", username);
+                LoginRequest loginRequest = new LoginRequest();
+                loginRequest.setUsername(username);
+                loginRequest.setPassword(password);
+                
+                User user = userService.loginUser(loginRequest);
+                String token = userService.generateToken(user);
+                
+                log.info("用户登录成功: {}", user.getUsername());
+                return ResponseEntity.ok(Map.of(
+                    "user", user,
+                    "token", token,
+                    "message", "登录成功",
+                    "action", "login"
+                ));
+            } else {
+                // 用户不存在，执行注册
+                log.info("用户不存在，执行注册: {}", username);
+                RegisterRequest registerRequest = new RegisterRequest();
+                registerRequest.setUsername(username);
+                registerRequest.setPassword(password);
+                
+                User user = userService.registerUser(registerRequest);
+                String token = userService.generateToken(user);
+                
+                log.info("用户注册成功: {}", user.getUsername());
+                return ResponseEntity.ok(Map.of(
+                    "user", user,
+                    "token", token,
+                    "message", "注册成功",
+                    "action", "register"
+                ));
+            }
+        } catch (Exception e) {
+            log.error("认证失败: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "认证失败: " + e.getMessage(),
+                "status", "error"
+            ));
+        }
+    }
+
+    /**
      * 用户登录
      * @param loginRequest 登录请求
      * @return JWT令牌

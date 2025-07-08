@@ -1,5 +1,6 @@
 package com.example.video_interface.config;
 
+import com.example.video_interface.filter.DecryptionFilter;
 import com.example.video_interface.security.CustomUserDetailsService;
 import com.example.video_interface.security.JwtAuthenticationFilter;
 import com.example.video_interface.security.JwtTokenProvider;
@@ -39,6 +40,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final DecryptionFilter decryptionFilter;
     private final Environment environment;
 
     @Value("${cors.allowed-origins}")
@@ -76,6 +78,7 @@ public class SecurityConfig {
                 // 允许用户认证相关的公开端点（注意：context-path=/api，所以这里路径不需要/api前缀）
                 auth.requestMatchers(HttpMethod.POST, "/users/register").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/users/login").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/users/auth").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/check-username").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/check-email").permitAll();
                 
@@ -87,7 +90,10 @@ public class SecurityConfig {
                 // 其他所有请求需要认证
                 auth.anyRequest().authenticated();
             })
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            // 🔓 添加解密过滤器（在JWT过滤器之前）
+            .addFilterBefore(decryptionFilter, UsernamePasswordAuthenticationFilter.class)
+            // 🔑 添加JWT认证过滤器
+            .addFilterAfter(jwtAuthenticationFilter, com.example.video_interface.filter.DecryptionFilter.class)
             .build();
     }
 

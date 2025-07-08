@@ -32,8 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final List<String> publicPaths = Arrays.asList(
         "/api/users/register",
         "/api/users/login",
+        "/api/users/auth",
         "/api/users/check-username",
         "/api/users/check-email",
+        "/api/users/admin/login",
+        "/api/users/admin/init",
+        "/api/users/admin/check-status",
         "/error"
     );
 

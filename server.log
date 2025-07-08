@@ -1,0 +1,319 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.example:video-interface >---------------------
+[INFO] Building video-app 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.3:run (default-cli) > test-compile @ video-interface >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ video-interface ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ video-interface ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ video-interface ---
+[INFO] skip non existing resourceDirectory /Users/zhangjin/fb_video/video-interface/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ video-interface ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.2.3:run (default-cli) < test-compile @ video-interface <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.3:run (default-cli) @ video-interface ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+[32m :: Spring Boot :: [39m              [2m (v3.2.3)[0;39m
+
+2025-07-08 21:16:44 [main] INFO  c.e.video_interface.Application - Starting Application using Java 23.0.2 with PID 83001 (/Users/zhangjin/fb_video/video-interface/target/classes started by zhangjin in /Users/zhangjin/fb_video/video-interface)
+2025-07-08 21:16:44 [main] DEBUG c.e.video_interface.Application - Running with Spring Boot v3.2.3, Spring v6.1.4
+2025-07-08 21:16:44 [main] INFO  c.e.video_interface.Application - No active profile set, falling back to 1 default profile: "default"
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 56 ms. Found 1 JPA repository interface.
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.example.video_interface.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-07-08 21:16:44 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 3 ms. Found 0 Redis repository interfaces.
+2025-07-08 21:16:45 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-07-08 21:16:45 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-08 21:16:45 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-07-08 21:16:45 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-07-08 21:16:45 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 579 ms
+2025-07-08 21:16:45 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-07-08 21:16:45 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@34a20f16
+2025-07-08 21:16:45 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-07-08 21:16:45 [main] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 9.22.3 by Redgate
+2025-07-08 21:16:45 [main] INFO  o.f.c.i.license.VersionPrinter - See release notes here: https://rd.gt/416ObMi
+2025-07-08 21:16:45 [main] INFO  o.f.c.i.license.VersionPrinter - 
+2025-07-08 21:16:45 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/fb_video (MySQL 9.3)
+2025-07-08 21:16:45 [main] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.0.
+2025-07-08 21:16:45 [main] INFO  o.f.core.internal.command.DbValidate - Successfully validated 4 migrations (execution time 00:00.087s)
+2025-07-08 21:16:45 [main] INFO  o.f.core.internal.command.DbMigrate - Current version of schema `fb_video`: 5
+2025-07-08 21:16:45 [main] WARN  o.f.core.internal.command.DbMigrate - outOfOrder mode is active. Migration of schema `fb_video` may not be reproducible.
+2025-07-08 21:16:45 [main] INFO  o.f.core.internal.command.DbMigrate - Schema `fb_video` is up to date. No migration necessary.
+2025-07-08 21:16:45 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-08 21:16:45 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2025-07-08 21:16:45 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-07-08 21:16:45 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-08 21:16:45 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-07-08 21:16:45 [main] WARN  org.hibernate.orm.deprecation - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-08 21:16:46 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-07-08 21:16:46 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-08 21:16:46 [main] DEBUG c.e.v.security.JwtTokenProvider - Initializing enhanced JWT security with secret length: 63
+2025-07-08 21:16:46 [main] DEBUG c.e.v.security.JwtTokenProvider - Enhanced JWT security initialized successfully
+2025-07-08 21:16:46 [main] DEBUG c.e.v.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig - 🔐 加密配置初始化完成:
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 基础密钥长度: 30 字符
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 时间窗口: 300000 ms
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ AES算法: AES/CTR/NoPadding
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ HMAC算法: HmacSHA256
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 哈希算法: SHA-256
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ JWT设备绑定: true
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ JWT额外加密: true
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ H5加密启用: true
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 管理端加密启用: true
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 移动端加密启用: true
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 要求签名验证: false
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   ├─ 严格设备绑定: false
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig -   └─ 敏感字段数量: 15
+2025-07-08 21:16:46 [main] WARN  c.e.v.config.CryptoConfig - ⚠️ 基础密钥长度不足32字符，建议使用更强的密钥
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.CryptoConfig - ✅ 加密配置安全性检查完成
+2025-07-08 21:16:46 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-08 21:16:46 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 14 mappings in 'requestMappingHandlerMapping'
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.SecurityConfig - 配置安全过滤链
+2025-07-08 21:16:46 [main] INFO  c.e.v.config.SecurityConfig - 配置CORS规则，允许的源：[http://localhost:5173, http://localhost:3000, http://localhost:4000, http://localhost:8080]
+2025-07-08 21:16:46 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1d12eff1, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@206a465f, org.springframework.security.web.context.SecurityContextHolderFilter@661d49d1, org.springframework.security.web.header.HeaderWriterFilter@7c07deff, org.springframework.web.filter.CorsFilter@c509742, org.springframework.security.web.authentication.logout.LogoutFilter@509d999c, com.example.video_interface.filter.DecryptionFilter@1f57fa23, com.example.video_interface.security.JwtAuthenticationFilter@2351255a, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@27f43664, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@234adbe2, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@77a6aa9f, org.springframework.security.web.session.SessionManagementFilter@51bd10f0, org.springframework.security.web.access.ExceptionTranslationFilter@12922d53, org.springframework.security.web.access.intercept.AuthorizationFilter@4e7e7763]
+2025-07-08 21:16:46 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-07-08 21:16:46 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-07-08 21:16:46 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-07-08 21:16:46 [main] INFO  c.e.video_interface.Application - Started Application in 2.305 seconds (process running for 2.443)
+2025-07-08 21:17:11 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-08 21:17:11 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@c1d9c40
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@693c7741
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-07-08 21:17:11 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=null, hasSignature=true
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ⚠️ 开发模式：跳过签名验证
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ⚠️ 开发模式：跳过加密数据解密，提取明文数据
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 📄 开发模式处理后的数据: {"username":{"ciphertext":"YWRtaW4=","iv":"dGVzdGl2MTIzNDU2Nzg="},"password":"admin123"}
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /users/admin/login
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=null, hasSignature=true
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ⚠️ 开发模式：跳过签名验证
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - 📄 请求无加密数据
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - JWT过滤器处理请求: POST /api/users/admin/login
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/register vs /api/users/admin/login = false
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/login vs /api/users/admin/login = false
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/check-username vs /api/users/admin/login = false
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/check-email vs /api/users/admin/login = false
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /error vs /api/users/admin/login = false
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径 /api/users/admin/login 是否为公开路径: false
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 需要认证的路径: /api/users/admin/login
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG c.e.v.s.JwtAuthenticationFilter - 无效或缺失JWT token
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /users/admin/login
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/admin/login", parameters={}
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.example.video_interface.controller.UserController#adminLogin(LoginRequest)
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.method.HandlerMethod - Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<?> com.example.video_interface.controller.UserController.adminLogin(com.example.video_interface.dto.LoginRequest): JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`)
+2025-07-08 21:17:11 [http-nio-8080-exec-1] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`)]
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 400 BAD_REQUEST
+2025-07-08 21:17:11 [http-nio-8080-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-07-08 21:17:11 [http-nio-8080-exec-1] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+java.io.IOException: Stream closed
+	at org.apache.catalina.connector.InputBuffer.throwIfClosed(InputBuffer.java:542)
+	at org.apache.catalina.connector.InputBuffer.read(InputBuffer.java:353)
+	at org.apache.catalina.connector.CoyoteInputStream.read(CoyoteInputStream.java:132)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:350)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:393)
+	at java.base/sun.nio.cs.StreamDecoder.lockedRead(StreamDecoder.java:217)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:171)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:190)
+	at java.base/java.io.Reader.read(Reader.java:269)
+	at org.springframework.util.StreamUtils.copyToString(StreamUtils.java:85)
+	at com.example.video_interface.filter.DecryptionFilter.getRequestBody(DecryptionFilter.java:199)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:64)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:642)
+	at org.apache.catalina.core.ApplicationDispatcher.processRequest(ApplicationDispatcher.java:410)
+	at org.apache.catalina.core.ApplicationDispatcher.doForward(ApplicationDispatcher.java:340)
+	at org.apache.catalina.core.ApplicationDispatcher.forward(ApplicationDispatcher.java:277)
+	at org.apache.catalina.core.StandardHostValve.custom(StandardHostValve.java:362)
+	at org.apache.catalina.core.StandardHostValve.status(StandardHostValve.java:222)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:151)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=null, hasSignature=false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 📄 普通请求，无需解密验证
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing POST /users/admin/login
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=null, hasSignature=false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 📄 普通请求，无需解密验证
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - JWT过滤器处理请求: POST /api/users/admin/login
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/register vs /api/users/admin/login = false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/login vs /api/users/admin/login = false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/check-username vs /api/users/admin/login = false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/check-email vs /api/users/admin/login = false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /error vs /api/users/admin/login = false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径 /api/users/admin/login 是否为公开路径: false
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 需要认证的路径: /api/users/admin/login
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.s.JwtAuthenticationFilter - 无效或缺失JWT token
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured POST /users/admin/login
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/admin/login", parameters={}
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.example.video_interface.controller.UserController#adminLogin(LoginRequest)
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [LoginRequest(username=admin, password=admin123)]
+2025-07-08 21:18:51 [http-nio-8080-exec-2] INFO  c.e.v.controller.UserController - 收到管理员登录请求: admin
+2025-07-08 21:18:51 [http-nio-8080-exec-2] INFO  c.e.v.service.impl.UserServiceImpl - 处理管理员登录请求: admin
+Hibernate: select u1_0.id,u1_0.account_balance,u1_0.avatar,u1_0.created_at,u1_0.email,u1_0.is_locked,u1_0.is_vip,u1_0.last_login_ip,u1_0.last_login_time,u1_0.lock_reason,u1_0.password,u1_0.phone_number,u1_0.role,u1_0.status,u1_0.updated_at,u1_0.username,u1_0.vip_expire_time,u1_0.watch_time from users u1_0 where u1_0.username=?
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.s.a.d.DaoAuthenticationProvider - Authenticated user
+Hibernate: select u1_0.id,u1_0.account_balance,u1_0.avatar,u1_0.created_at,u1_0.email,u1_0.is_locked,u1_0.is_vip,u1_0.last_login_ip,u1_0.last_login_time,u1_0.lock_reason,u1_0.password,u1_0.phone_number,u1_0.role,u1_0.status,u1_0.updated_at,u1_0.username,u1_0.vip_expire_time,u1_0.watch_time from users u1_0 where u1_0.username=? and u1_0.role=?
+Hibernate: update users set account_balance=?,avatar=?,email=?,is_locked=?,is_vip=?,last_login_ip=?,last_login_time=?,lock_reason=?,password=?,phone_number=?,role=?,status=?,updated_at=?,username=?,vip_expire_time=?,watch_time=? where id=?
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG c.e.v.security.JwtTokenProvider - Generating enhanced JWT token for user: admin with device: unknown
+2025-07-08 21:18:51 [http-nio-8080-exec-2] INFO  c.e.v.controller.UserController - 管理员登录成功: admin
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [{token=qJfxgKR8LfFdAXl7if29joKA+sI5HcwmLioK+19w6YoDa43Dau2drz7Q4+I3EAKD5772Gpr8M39FJJns1OaBohwrsEKvS (truncated)...]
+2025-07-08 21:18:51 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=admin, hasSignature=true
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ⚠️ 开发模式：跳过签名验证
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ⚠️ 开发模式：跳过加密数据解密，提取明文数据
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 📄 开发模式处理后的数据: {"username":{"ciphertext":"z6ra0fI=","iv":"FIL8bg==","timestamp":1751984425667},"password":{"ciphertext":"rRn10JfU8eI=","iv":"ulSOgA==","timestamp":1751984425666},"captcha":""}
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.security.web.FilterChainProxy - Securing POST /users/admin/login
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 🔍 处理请求: method=POST, url=/api/users/admin/login, clientType=admin, hasSignature=true
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ⚠️ 开发模式：跳过签名验证
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 📄 请求无加密数据
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - JWT过滤器处理请求: POST /api/users/admin/login
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/register vs /api/users/admin/login = false
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/login vs /api/users/admin/login = false
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/check-username vs /api/users/admin/login = false
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /api/users/check-email vs /api/users/admin/login = false
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径匹配检查: /error vs /api/users/admin/login = false
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 路径 /api/users/admin/login 是否为公开路径: false
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 需要认证的路径: /api/users/admin/login
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG c.e.v.s.JwtAuthenticationFilter - 无效或缺失JWT token
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.security.web.FilterChainProxy - Secured POST /users/admin/login
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/admin/login", parameters={}
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.example.video_interface.controller.UserController#adminLogin(LoginRequest)
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.web.method.HandlerMethod - Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<?> com.example.video_interface.controller.UserController.adminLogin(com.example.video_interface.dto.LoginRequest): JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`)
+2025-07-08 21:20:25 [http-nio-8080-exec-4] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`)]
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - Completed 400 BAD_REQUEST
+2025-07-08 21:20:25 [http-nio-8080-exec-4] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-07-08 21:20:25 [http-nio-8080-exec-4] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+java.io.IOException: Stream closed
+	at org.apache.catalina.connector.InputBuffer.throwIfClosed(InputBuffer.java:542)
+	at org.apache.catalina.connector.InputBuffer.read(InputBuffer.java:353)
+	at org.apache.catalina.connector.CoyoteInputStream.read(CoyoteInputStream.java:132)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:350)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:393)
+	at java.base/sun.nio.cs.StreamDecoder.lockedRead(StreamDecoder.java:217)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:171)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:190)
+	at java.base/java.io.Reader.read(Reader.java:269)
+	at org.springframework.util.StreamUtils.copyToString(StreamUtils.java:85)
+	at com.example.video_interface.filter.DecryptionFilter.getRequestBody(DecryptionFilter.java:199)
+	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:64)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:642)
+	at org.apache.catalina.core.ApplicationDispatcher.processRequest(ApplicationDispatcher.java:410)
+	at org.apache.catalina.core.ApplicationDispatcher.doForward(ApplicationDispatcher.java:340)
+	at org.apache.catalina.core.ApplicationDispatcher.forward(ApplicationDispatcher.java:277)
+	at org.apache.catalina.core.StandardHostValve.custom(StandardHostValve.java:362)
+	at org.apache.catalina.core.StandardHostValve.status(StandardHostValve.java:222)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:151)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+2025-07-08 21:21:17 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-08 21:21:17 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-07-08 21:21:17 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
