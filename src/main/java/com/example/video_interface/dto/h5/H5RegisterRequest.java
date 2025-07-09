@@ -1,4 +1,4 @@
-package com.example.video_interface.dto;
+package com.example.video_interface.dto.h5;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class H5RegisterRequest {
     private String username;
     private String password;
-    private String captcha;    // 验证码
-    private String sessionId;  // 验证码会话ID
 } 

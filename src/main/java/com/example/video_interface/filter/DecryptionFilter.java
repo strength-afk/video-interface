@@ -151,7 +151,7 @@ public class DecryptionFilter implements Filter {
                 );
                 
                 if (!signatureValid) {
-                    log.warn("❌ 请求签名验证失败: {} {}", method, httpRequest.getRequestURI());
+                    log.warn("请求签名验证失败: {} {}", method, httpRequest.getRequestURI());
                     setCorsHeaders(httpResponse, httpRequest);
                     httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     httpResponse.setContentType("application/json;charset=UTF-8");
@@ -192,13 +192,13 @@ public class DecryptionFilter implements Filter {
             chain.doFilter(processedRequest, response);
             
         } catch (NumberFormatException e) {
-            log.error("❌ 时间戳格式错误", e);
+            log.error("时间戳格式错误", e);
             setCorsHeaders(httpResponse, httpRequest);
             httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             httpResponse.setContentType("application/json;charset=UTF-8");
             httpResponse.getWriter().write("{\"error\":\"时间戳格式错误\",\"code\":400}");
         } catch (Exception e) {
-            log.error("❌ 请求解密处理失败", e);
+            log.error("请求解密处理失败", e);
             setCorsHeaders(httpResponse, httpRequest);
             httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             httpResponse.setContentType("application/json;charset=UTF-8");

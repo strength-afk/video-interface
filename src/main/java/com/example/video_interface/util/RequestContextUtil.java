@@ -94,7 +94,7 @@ public class RequestContextUtil {
                 .orElse(null);
             
             if (request == null) {
-                log.warn("⚠️ 无法获取当前请求上下文，使用默认IP");
+                log.warn("无法获取当前请求上下文，使用默认IP");
                 return "unknown";
             }
             
@@ -117,8 +117,21 @@ public class RequestContextUtil {
             return remoteAddr != null ? remoteAddr : "unknown";
             
         } catch (Exception e) {
-            log.error("❌ 获取客户端IP地址失败: {}", e.getMessage());
+            log.error("获取客户端IP地址失败: {}", e.getMessage());
             return "unknown";
         }
+    }
+
+    /**
+     * 从请求头中获取认证令牌
+     * @return 认证令牌，如果不存在则返回null
+     */
+    public static String getAuthToken() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 } 

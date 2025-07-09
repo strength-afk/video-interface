@@ -1,5 +1,6 @@
-package com.example.video_interface.service;
+package com.example.video_interface.service.common.impl;
 
+import com.example.video_interface.service.common.IRegistrationLimitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -8,14 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 注册限制服务
+ * 注册限制服务实现类
  * 使用Redis存储IP地址的注册次数，防止同一IP短时间内大量注册
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RegistrationLimitService {
-    
+public class RegistrationLimitServiceImpl implements IRegistrationLimitService {
     private final RedisTemplate<String, Object> redisTemplate;
     
     /**
@@ -38,6 +38,7 @@ public class RegistrationLimitService {
      * @param clientIp 客户端IP地址
      * @return true如果可以注册，false如果已达到限制
      */
+    @Override
     public boolean canRegister(String clientIp) {
         String key = REDIS_KEY_PREFIX + clientIp;
         
@@ -57,7 +58,7 @@ public class RegistrationLimitService {
             
             boolean canRegister = currentCount < MAX_REGISTRATIONS_PER_HOUR;
             
-            log.debug("🔍 IP {} 当前注册次数: {}, 限制: {}, 可注册: {}", 
+            log.debug("IP {} 当前注册次数: {}, 限制: {}, 可注册: {}", 
                 clientIp, currentCount, MAX_REGISTRATIONS_PER_HOUR, canRegister);
             
             return canRegister;
@@ -73,6 +74,7 @@ public class RegistrationLimitService {
      * @param clientIp 客户端IP地址
      * @return 当前注册次数
      */
+    @Override
     public int getCurrentCount(String clientIp) {
         String key = REDIS_KEY_PREFIX + clientIp;
         
@@ -102,6 +104,7 @@ public class RegistrationLimitService {
      * @param clientIp 客户端IP地址
      * @return 更新后的注册次数
      */
+    @Override
     public int recordRegistration(String clientIp) {
         String key = REDIS_KEY_PREFIX + clientIp;
         
@@ -112,11 +115,11 @@ public class RegistrationLimitService {
             // 设置过期时间（首次创建时）
             if (newCount == 1) {
                 redisTemplate.expire(key, LIMIT_TIME_WINDOW_HOURS, TimeUnit.HOURS);
-                log.debug("🕐 为IP {} 设置注册限制窗口: {} 小时", clientIp, LIMIT_TIME_WINDOW_HOURS);
+                log.debug("为IP {} 设置注册限制窗口: {} 小时", clientIp, LIMIT_TIME_WINDOW_HOURS);
             }
             
             int count = newCount.intValue();
-            log.info("📝 记录注册，IP: {}, 当前次数: {}/{}", clientIp, count, MAX_REGISTRATIONS_PER_HOUR);
+            log.info("记录注册，IP: {}, 当前次数: {}/{}", clientIp, count, MAX_REGISTRATIONS_PER_HOUR);
             
             return count;
         } catch (Exception e) {
@@ -130,6 +133,7 @@ public class RegistrationLimitService {
      * @param clientIp 客户端IP地址
      * @return 剩余可注册次数
      */
+    @Override
     public int getRemainingCount(String clientIp) {
         int currentCount = getCurrentCount(clientIp);
         return Math.max(0, MAX_REGISTRATIONS_PER_HOUR - currentCount);
@@ -140,6 +144,7 @@ public class RegistrationLimitService {
      * @param clientIp 客户端IP地址
      * @return 限制重置时间（秒），如果没有限制返回0
      */
+    @Override
     public long getResetTimeInSeconds(String clientIp) {
         String key = REDIS_KEY_PREFIX + clientIp;
         
@@ -156,12 +161,13 @@ public class RegistrationLimitService {
      * 手动清除IP的注册限制（仅用于管理员操作）
      * @param clientIp 客户端IP地址
      */
+    @Override
     public void clearRegistrationLimit(String clientIp) {
         String key = REDIS_KEY_PREFIX + clientIp;
         
         try {
             redisTemplate.delete(key);
-            log.info("🗑️ 已清除IP {} 的注册限制", clientIp);
+            log.info("已清除IP {} 的注册限制", clientIp);
         } catch (Exception e) {
             log.error("清除注册限制失败，IP: {}, 错误: {}", clientIp, e.getMessage());
         }

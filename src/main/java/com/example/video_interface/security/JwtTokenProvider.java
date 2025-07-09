@@ -24,6 +24,7 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
+import com.example.video_interface.model.User;
 
 @Slf4j
 @Component
@@ -99,6 +100,20 @@ public class JwtTokenProvider {
             log.error("Token加密失败，返回未加密版本", e);
             return baseToken;
         }
+    }
+
+    /**
+     * 为用户生成JWT令牌
+     * @param user 用户信息
+     * @return JWT令牌
+     */
+    public String generateToken(User user) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            user,  // 传递User对象（实现了UserDetails）而不是用户名字符串
+            null,
+            user.getAuthorities()
+        );
+        return generateToken(authentication);
     }
 
     /**

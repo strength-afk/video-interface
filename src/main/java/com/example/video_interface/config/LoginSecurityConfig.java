@@ -23,7 +23,7 @@ public class LoginSecurityConfig {
      * 最大登录失败次数（普通用户）
      * 默认5次，可通过配置文件调整
      */
-    private int maxFailedAttempts = 5;
+    private int maxFailedAttempts = 10;
 
     /**
      * 管理员最大登录失败次数
@@ -82,7 +82,7 @@ public class LoginSecurityConfig {
 
     @PostConstruct
     public void init() {
-        log.info("🔒 登录安全配置初始化完成:");
+        log.info(" 登录安全配置初始化完成:");
         log.info("  ├─ 普通用户最大失败次数: {}", maxFailedAttempts);
         log.info("  ├─ 管理员最大失败次数: {}", adminMaxFailedAttempts);
         log.info("  ├─ 普通用户锁定时间: {} 分钟", lockDurationMinutes);
@@ -101,26 +101,26 @@ public class LoginSecurityConfig {
      */
     private void validateConfiguration() {
         if (maxFailedAttempts <= 0 || adminMaxFailedAttempts <= 0) {
-            log.warn("⚠️ 最大失败次数不能小于等于0，将使用默认值");
+            log.warn(" 最大失败次数不能小于等于0，将使用默认值");
             if (maxFailedAttempts <= 0) maxFailedAttempts = 5;
             if (adminMaxFailedAttempts <= 0) adminMaxFailedAttempts = 3;
         }
 
         if (lockDurationMinutes <= 0 || adminLockDurationMinutes <= 0) {
-            log.warn("⚠️ 锁定时间不能小于等于0，将使用默认值");
+            log.warn(" 锁定时间不能小于等于0，将使用默认值");
             if (lockDurationMinutes <= 0) lockDurationMinutes = 30;
             if (adminLockDurationMinutes <= 0) adminLockDurationMinutes = 60;
         }
 
         if (adminMaxFailedAttempts > maxFailedAttempts) {
-            log.warn("⚠️ 管理员最大失败次数应该小于等于普通用户，建议调整配置");
+            log.warn(" 管理员最大失败次数应该小于等于普通用户，建议调整配置");
         }
 
         if (adminLockDurationMinutes < lockDurationMinutes) {
-            log.warn("⚠️ 管理员锁定时间建议大于等于普通用户锁定时间");
+            log.warn(" 管理员锁定时间建议大于等于普通用户锁定时间");
         }
 
-        log.info("✅ 登录安全配置验证完成");
+        log.info(" 登录安全配置验证完成");
     }
 
     /**

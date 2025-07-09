@@ -100,7 +100,7 @@
 2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
 2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
 2025-07-09 00:50:14 [http-nio-8080-exec-1] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
-2025-07-09 00:50:14 [http-nio-8080-exec-1] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+2025-07-09 00:50:14 [http-nio-8080-exec-1] ERROR c.e.video_interface.util.CryptoUtil - 解密敏感数据失败
 java.lang.RuntimeException: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -126,7 +126,7 @@ java.lang.RuntimeException: 数据签名验证失败
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1623)
-2025-07-09 00:50:14 [http-nio-8080-exec-1] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+2025-07-09 00:50:14 [http-nio-8080-exec-1] ERROR c.e.v.filter.DecryptionFilter - 请求解密处理失败
 java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -175,8 +175,8 @@ Caused by: java.lang.RuntimeException: 数据签名验证失败
 2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil - 🔧 URL路径处理:
 2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
 2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
-2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
-2025-07-09 00:54:14 [http-nio-8080-exec-2] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+2025-07-09 00:54:14 [http-nio-8080-exec-2] DEBUG c.e.v.filter.DecryptionFilter - 请求签名验证成功
+2025-07-09 00:54:14 [http-nio-8080-exec-2] ERROR c.e.video_interface.util.CryptoUtil - 解密敏感数据失败
 java.lang.RuntimeException: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -202,7 +202,7 @@ java.lang.RuntimeException: 数据签名验证失败
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1623)
-2025-07-09 00:54:14 [http-nio-8080-exec-2] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+2025-07-09 00:54:14 [http-nio-8080-exec-2] ERROR c.e.v.filter.DecryptionFilter - 请求解密处理失败
 java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -252,7 +252,7 @@ Caused by: java.lang.RuntimeException: 数据签名验证失败
 2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
 2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
 2025-07-09 00:54:25 [http-nio-8080-exec-3] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
-2025-07-09 00:54:25 [http-nio-8080-exec-3] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+2025-07-09 00:54:25 [http-nio-8080-exec-3] ERROR c.e.video_interface.util.CryptoUtil - 解密敏感数据失败
 java.lang.RuntimeException: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -278,7 +278,7 @@ java.lang.RuntimeException: 数据签名验证失败
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1623)
-2025-07-09 00:54:25 [http-nio-8080-exec-3] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+2025-07-09 00:54:25 [http-nio-8080-exec-3] ERROR c.e.v.filter.DecryptionFilter -  请求解密处理失败
 java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -327,8 +327,8 @@ Caused by: java.lang.RuntimeException: 数据签名验证失败
 2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil - 🔧 URL路径处理:
 2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 原始URL: /api/users/admin/login
 2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.video_interface.util.CryptoUtil -   - 相对路径: /users/admin/login
-2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - ✅ 请求签名验证成功
-2025-07-09 00:59:42 [http-nio-8080-exec-4] ERROR c.e.video_interface.util.CryptoUtil - ❌ 解密敏感数据失败
+2025-07-09 00:59:42 [http-nio-8080-exec-4] DEBUG c.e.v.filter.DecryptionFilter - 请求签名验证成功
+2025-07-09 00:59:42 [http-nio-8080-exec-4] ERROR c.e.video_interface.util.CryptoUtil - 解密敏感数据失败
 java.lang.RuntimeException: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:191)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)
@@ -354,7 +354,7 @@ java.lang.RuntimeException: 数据签名验证失败
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1623)
-2025-07-09 00:59:42 [http-nio-8080-exec-4] ERROR c.e.v.filter.DecryptionFilter - ❌ 请求解密处理失败
+2025-07-09 00:59:42 [http-nio-8080-exec-4] ERROR c.e.v.filter.DecryptionFilter - 请求解密处理失败
 java.lang.RuntimeException: 数据解密失败: 数据签名验证失败
 	at com.example.video_interface.util.CryptoUtil.decryptSensitiveData(CryptoUtil.java:217)
 	at com.example.video_interface.filter.DecryptionFilter.doFilter(DecryptionFilter.java:253)

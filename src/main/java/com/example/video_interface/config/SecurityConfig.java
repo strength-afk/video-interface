@@ -35,6 +35,7 @@ import java.util.Arrays;
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 @Slf4j
+// CORS配置统一在SecurityConfig中管理
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -88,9 +89,9 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.POST, "/users/captcha/verify").permitAll();
                 
                 // 允许管理员相关的公开端点
-                auth.requestMatchers(HttpMethod.POST, "/users/admin/login").permitAll();
-                auth.requestMatchers(HttpMethod.POST, "/users/admin/init").permitAll();
-                auth.requestMatchers(HttpMethod.GET, "/users/admin/check-status").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/admin/login").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/admin/init").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/admin/check-status").permitAll();
                 
                 // 其他所有请求需要认证
                 auth.anyRequest().authenticated();

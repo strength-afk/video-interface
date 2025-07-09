@@ -233,7 +233,7 @@ public class CryptoUtil {
                 
                 // 🔍 调试内层数据签名验证（仅开发环境）
                 if (DEBUG_ENABLED) {
-                    log.debug("🔐 内层数据签名验证:");
+                    log.debug("内层数据签名验证:");
                     log.debug("  加密字段数量: {}", encryptedFields.size());
                     log.debug("  时间戳: {}", timestamp);
                     log.debug("  设备指纹: {}...", deviceFingerprint.substring(0, 8));
@@ -243,18 +243,18 @@ public class CryptoUtil {
                 if (!hmacVerify(signatureData, signature, dynamicKey)) {
                     if (DEBUG_ENABLED) {
                         String expectedSignature = hmacSign(signatureData, dynamicKey);
-                        log.error("❌ 内层数据签名不匹配:");
+                        log.error("内层数据签名不匹配:");
                         log.error("  期望签名数据: {}", signatureData);
                         log.error("  接收签名: {}", signature);
                         log.error("  期望签名: {}", expectedSignature);
                     } else {
-                        log.error("❌ 内层数据签名验证失败");
+                        log.error("内层数据签名验证失败");
                     }
                     throw new RuntimeException("数据签名验证失败");
                 }
             } else {
                 // 🚨 这个分支不应该被执行（REQUIRE_SIGNATURE = true）
-                log.error("🚨 安全警告：数据签名验证被意外跳过！");
+                log.error("安全警告：数据签名验证被意外跳过！");
                 throw new RuntimeException("安全验证失败：签名验证被跳过");
             }
             
@@ -273,11 +273,11 @@ public class CryptoUtil {
                 }
             }
             
-            log.info("✅ 成功解密敏感数据，字段: {}", encryptedFields);
+            log.info("成功解密敏感数据，字段: {}", encryptedFields);
             return decryptedData;
             
         } catch (Exception e) {
-            log.error("❌ 解密敏感数据失败", e);
+            log.error("解密敏感数据失败", e);
             throw new RuntimeException("数据解密失败: " + e.getMessage(), e);
         }
     }
