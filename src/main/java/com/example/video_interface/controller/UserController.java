@@ -4,6 +4,8 @@ import com.example.video_interface.dto.LoginRequest;
 import com.example.video_interface.dto.RegisterRequest;
 import com.example.video_interface.model.User;
 import com.example.video_interface.service.UserService;
+import com.example.video_interface.service.CaptchaService;
+import com.example.video_interface.service.H5LoginFailureService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 用户控制器
@@ -23,6 +26,27 @@ import java.util.Map;
 @Slf4j
 public class UserController {
     private final UserService userService;
+    private final CaptchaService captchaService;
+    private final H5LoginFailureService h5LoginFailureService;
+
+    /**
+     * 获取客户端真实IP地址
+     * @param request HTTP请求
+     * @return 客户端IP地址
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
+            return xRealIp;
+        }
+        
+        return request.getRemoteAddr();
+    }
 
     /**
      * 用户注册
@@ -47,7 +71,7 @@ public class UserController {
         } catch (Exception e) {
             log.error("注册失败: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(Map.of(
-                "error", "注册失败: " + e.getMessage(),
+                "error", e.getMessage(),  // 直接返回错误信息，不加前缀
                 "status", "error"
             ));
         }
@@ -60,12 +84,14 @@ public class UserController {
      * @return JWT令牌和用户信息
      */
     @PostMapping("/auth")
-    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> authRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> authRequest, HttpServletRequest request) {
         try {
             String username = authRequest.get("username");
             String password = authRequest.get("password");
+            String captcha = authRequest.get("captcha");
+            String sessionId = authRequest.get("sessionId");
             
-            log.info("收到统一认证请求: {}", username);
+            log.info("收到H5统一认证请求: {}", username);
             
             if (username == null || password == null) {
                 return ResponseEntity.badRequest().body(Map.of(
@@ -78,16 +104,22 @@ public class UserController {
             boolean userExists = userService.existsByUsername(username);
             
             if (userExists) {
-                // 用户存在，执行登录
-                log.info("用户已存在，执行登录: {}", username);
+                // 用户存在，执行H5登录（无锁定机制）
+                log.info("用户已存在，执行H5登录: {}", username);
                 LoginRequest loginRequest = new LoginRequest();
                 loginRequest.setUsername(username);
                 loginRequest.setPassword(password);
+                loginRequest.setCaptcha(captcha);
+                loginRequest.setSessionId(sessionId);
                 
-                User user = userService.loginUser(loginRequest);
+                User user = userService.h5LoginUser(loginRequest);  // 使用专门的H5登录方法
                 String token = userService.generateToken(user);
                 
-                log.info("用户登录成功: {}", user.getUsername());
+                // 登录成功，清除失败次数
+                String clientIp = getClientIp(request);
+                h5LoginFailureService.clearFailCount(clientIp);
+                
+                log.info("H5用户登录成功: {}", user.getUsername());
                 return ResponseEntity.ok(Map.of(
                     "user", user,
                     "token", token,
@@ -113,37 +145,91 @@ public class UserController {
                 ));
             }
         } catch (Exception e) {
-            log.error("认证失败: {}", e.getMessage(), e);
+            log.error("H5认证失败: {}", e.getMessage(), e);
+            
+            // 获取客户端IP
+            String clientIp = getClientIp(request);
+            
+            // 检查是否是登录失败（排除注册相关错误）
+            String errorMessage = e.getMessage();
+            boolean isLoginFailure = errorMessage != null && 
+                (errorMessage.contains("用户名或密码错误") || 
+                 errorMessage.contains("密码错误") || 
+                 errorMessage.contains("用户不存在") ||
+                 errorMessage.contains("验证码")) &&
+                !errorMessage.contains("注册频繁") &&  // 排除注册限制错误
+                !errorMessage.contains("用户名已被使用") &&  // 排除注册验证错误
+                !errorMessage.contains("用户名长度必须") &&  // 排除注册验证错误
+                !errorMessage.contains("密码长度必须") &&   // 排除注册验证错误
+                !errorMessage.contains("用户名只能包含");   // 排除注册验证错误
+            
+            boolean needCaptcha = false;
+            if (isLoginFailure) {
+                // 增加失败次数
+                int failCount = h5LoginFailureService.incrementFailCount(clientIp);
+                needCaptcha = h5LoginFailureService.needCaptcha(failCount);
+                log.info("H5登录失败，IP: {}, 失败次数: {}, 需要验证码: {}", clientIp, failCount, needCaptcha);
+            }
+            
             return ResponseEntity.badRequest().body(Map.of(
-                "error", "认证失败: " + e.getMessage(),
-                "status", "error"
+                "error", errorMessage,  // 直接返回错误信息，不加前缀
+                "status", "error",
+                "needCaptcha", needCaptcha
             ));
         }
     }
 
     /**
-     * 用户登录
+     * 用户登录 (支持H5验证码和失败计数)
      * @param loginRequest 登录请求
+     * @param request HTTP请求
      * @return JWT令牌
      */
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
-            log.info("收到登录请求: {}", loginRequest.getUsername());
-            User user = userService.loginUser(loginRequest);
+            log.info("收到H5登录请求: {}", loginRequest.getUsername());
+            
+            // 使用H5专用登录方法（支持验证码和失败计数，但不会自动注册）
+            User user = userService.h5LoginUser(loginRequest);
             String token = userService.generateToken(user);
             
-            log.info("用户登录成功: {}", user.getUsername());
+            // 登录成功，清除失败次数
+            String clientIp = getClientIp(request);
+            h5LoginFailureService.clearFailCount(clientIp);
+            
+            log.info("H5用户登录成功: {}", user.getUsername());
             return ResponseEntity.ok(Map.of(
                 "user", user,
                 "token", token,
                 "message", "登录成功"
             ));
         } catch (Exception e) {
-            log.error("登录失败: {}", e.getMessage(), e);
+            log.error("H5登录失败: {}", e.getMessage(), e);
+            
+            // 获取客户端IP
+            String clientIp = getClientIp(request);
+            
+            // 检查是否是登录失败（需要计入失败次数）
+            String errorMessage = e.getMessage();
+            boolean isLoginFailure = errorMessage != null && 
+                (errorMessage.contains("用户名或密码错误") || 
+                 errorMessage.contains("密码错误") || 
+                 errorMessage.contains("用户不存在") ||
+                 errorMessage.contains("验证码"));
+            
+            boolean needCaptcha = false;
+            if (isLoginFailure) {
+                // 增加失败次数
+                int failCount = h5LoginFailureService.incrementFailCount(clientIp);
+                needCaptcha = h5LoginFailureService.needCaptcha(failCount);
+                log.info("H5登录失败，IP: {}, 失败次数: {}, 需要验证码: {}", clientIp, failCount, needCaptcha);
+            }
+            
             return ResponseEntity.badRequest().body(Map.of(
-                "error", "登录失败: " + e.getMessage(),
-                "status", "error"
+                "error", errorMessage,  // 直接返回错误信息，不加前缀
+                "status", "error",
+                "needCaptcha", needCaptcha
             ));
         }
     }
@@ -411,30 +497,118 @@ public class UserController {
     }
 
     /**
-     * 测试用管理员登录 - 不经过加密处理
-     * @param loginRequest 登录请求
-     * @return JWT令牌和管理员信息
+     * 获取验证码
+     * @param sessionId 会话ID（可选，如果不提供则自动生成）
+     * @return 验证码图片的Base64编码和会话ID
      */
-    @PostMapping("/admin/test-login")
-    public ResponseEntity<?> testAdminLogin(@RequestBody LoginRequest loginRequest) {
+    @GetMapping("/captcha")
+    public ResponseEntity<?> getCaptcha(@RequestParam(required = false) String sessionId) {
         try {
-            log.info("收到测试管理员登录请求: {}", loginRequest.getUsername());
-            User admin = userService.adminLogin(loginRequest);
-            String token = userService.generateToken(admin);
+            // 如果没有提供sessionId，则生成一个
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                sessionId = UUID.randomUUID().toString();
+            }
             
-            log.info("测试管理员登录成功: {}", admin.getUsername());
+            log.debug("收到获取验证码请求: sessionId={}", sessionId);
+            String captchaImage = captchaService.generateCaptcha(sessionId);
+            
             return ResponseEntity.ok(Map.of(
-                "admin", admin,
-                "token", token,
-                "message", "测试管理员登录成功",
-                "role", admin.getRole().name()
+                "captcha", captchaImage,
+                "sessionId", sessionId,
+                "status", "success",
+                "message", "验证码生成成功"
             ));
         } catch (Exception e) {
-            log.error("测试管理员登录失败: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "测试管理员登录失败: " + e.getMessage(),
+            log.error("获取验证码失败: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "获取验证码失败",
                 "status", "error"
             ));
         }
     }
+
+    /**
+     * 刷新验证码
+     * @param sessionId 会话ID
+     * @return 新的验证码图片Base64编码
+     */
+    @PostMapping("/captcha/refresh")
+    public ResponseEntity<?> refreshCaptcha(@RequestBody Map<String, String> requestData) {
+        try {
+            String sessionId = requestData.get("sessionId");
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "会话ID不能为空",
+                    "status", "error"
+                ));
+            }
+            
+            log.debug("收到刷新验证码请求: sessionId={}", sessionId);
+            
+            // 删除旧验证码
+            captchaService.refreshCaptcha(sessionId);
+            
+            // 生成新验证码
+            String captchaImage = captchaService.generateCaptcha(sessionId);
+            
+            return ResponseEntity.ok(Map.of(
+                "captcha", captchaImage,
+                "sessionId", sessionId,
+                "status", "success",
+                "message", "验证码刷新成功"
+            ));
+        } catch (Exception e) {
+            log.error("刷新验证码失败: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "刷新验证码失败",
+                "status", "error"
+            ));
+        }
+    }
+
+    /**
+     * 验证验证码
+     * @param verifyData 验证数据（包含sessionId和验证码）
+     * @return 验证结果
+     */
+    @PostMapping("/captcha/verify")
+    public ResponseEntity<?> verifyCaptcha(@RequestBody Map<String, String> verifyData) {
+        try {
+            String sessionId = verifyData.get("sessionId");
+            String captcha = verifyData.get("captcha");
+            
+            if (sessionId == null || captcha == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "会话ID和验证码不能为空",
+                    "status", "error"
+                ));
+            }
+            
+            log.debug("收到验证码验证请求: sessionId={}", sessionId);
+            boolean isValid = captchaService.verifyCaptcha(sessionId, captcha);
+            
+            if (isValid) {
+                return ResponseEntity.ok(Map.of(
+                    "valid", true,
+                    "status", "success",
+                    "message", "验证码验证成功"
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "valid", false,
+                    "status", "error",
+                    "error", "验证码错误或已过期"
+                ));
+            }
+        } catch (Exception e) {
+            log.error("验证码验证失败: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "valid", false,
+                "error", "验证码验证失败",
+                "status", "error"
+            ));
+        }
+    }
+
+
 } 

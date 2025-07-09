@@ -53,10 +53,10 @@ public class DecryptionFilter implements Filter {
             return;
         }
         
-        // 跳过错误页面请求和测试端点
+        // 跳过错误页面请求
         String requestPath = httpRequest.getRequestURI();
-        if (requestPath.contains("/error") || requestPath.contains("/admin/test-login")) {
-            log.debug("📄 跳过特殊请求: {}", requestPath);
+        if (requestPath.contains("/error")) {
+            log.debug("📄 跳过错误页面请求: {}", requestPath);
             chain.doFilter(request, response);
             return;
         }

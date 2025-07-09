@@ -29,6 +29,14 @@ public interface UserService {
     User loginUser(LoginRequest request);
 
     /**
+     * H5端用户登录（无锁定机制）
+     * @param request 登录请求，包含用户名、密码、验证码等信息
+     * @return 登录成功的用户信息
+     * @throws IllegalArgumentException 如果用户名或密码错误或验证码错误
+     */
+    User h5LoginUser(LoginRequest request);
+
+    /**
      * 为用户生成JWT令牌
      * @param user 用户信息
      * @return JWT令牌

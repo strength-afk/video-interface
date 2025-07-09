@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 🔒 登录安全服务
- * 处理登录失败次数、账户锁定、IP限制等安全功能
+ * 处理登录失败次数、账户锁定等安全功能
  */
 @Slf4j
 @Service
@@ -25,22 +25,7 @@ public class LoginSecurityService {
     private final LoginSecurityConfig loginSecurityConfig;
     private final UserRepository userRepository;
 
-    // IP失败次数缓存 - 使用内存缓存，重启后清零
-    private final Map<String, IpFailureInfo> ipFailureCache = new ConcurrentHashMap<>();
 
-    /**
-     * IP失败信息
-     */
-    private static class IpFailureInfo {
-        private int attempts;
-        private LocalDateTime lastAttempt;
-        private LocalDateTime lockTime;
-
-        public IpFailureInfo() {
-            this.attempts = 0;
-            this.lastAttempt = LocalDateTime.now();
-        }
-    }
 
     /**
      * 🔍 检查账户是否被锁定
@@ -70,57 +55,20 @@ public class LoginSecurityService {
         return LockCheckResult.notLocked();
     }
 
-    /**
-     * 🔍 检查IP是否被锁定
-     * @param clientIp 客户端IP
-     * @return 是否被锁定
-     */
-    public boolean isIpLocked(String clientIp) {
-        if (!loginSecurityConfig.isEnableIpLocking() || clientIp == null) {
-            return false;
-        }
 
-        IpFailureInfo ipInfo = ipFailureCache.get(clientIp);
-        if (ipInfo == null) {
-            return false;
-        }
 
-        // 检查是否达到IP锁定次数
-        if (ipInfo.attempts >= loginSecurityConfig.getMaxIpFailedAttempts()) {
-            // 检查锁定时间是否已过
-            if (ipInfo.lockTime != null) {
-                LocalDateTime unlockTime = ipInfo.lockTime.plusMinutes(loginSecurityConfig.getIpLockDurationMinutes());
-                if (LocalDateTime.now().isAfter(unlockTime)) {
-                    // 解锁IP
-                    ipFailureCache.remove(clientIp);
-                    log.info("🔓 IP自动解锁: {}", clientIp);
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
+        /**
      * 🚨 记录登录失败
      * @param user 用户对象
-     * @param clientIp 客户端IP
      * @return 是否导致账户锁定
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean recordLoginFailure(User user, String clientIp) {
+    public boolean recordLoginFailure(User user) {
         boolean accountLocked = false;
 
         if (user != null) {
             // 记录用户登录失败
             accountLocked = recordUserLoginFailure(user);
-        }
-
-        // 记录IP登录失败
-        if (loginSecurityConfig.isEnableIpLocking() && clientIp != null) {
-            recordIpLoginFailure(clientIp);
         }
 
         return accountLocked;
@@ -170,24 +118,7 @@ public class LoginSecurityService {
         return false;
     }
 
-    /**
-     * 📝 记录IP登录失败
-     * @param clientIp 客户端IP
-     */
-    private void recordIpLoginFailure(String clientIp) {
-        IpFailureInfo ipInfo = ipFailureCache.computeIfAbsent(clientIp, k -> new IpFailureInfo());
-        
-        ipInfo.attempts++;
-        ipInfo.lastAttempt = LocalDateTime.now();
 
-        // 检查是否需要锁定IP
-        if (ipInfo.attempts >= loginSecurityConfig.getMaxIpFailedAttempts()) {
-            ipInfo.lockTime = LocalDateTime.now();
-            log.warn("🔒 IP已锁定: {} (失败次数: {})", clientIp, ipInfo.attempts);
-        }
-
-        log.debug("📊 IP失败统计: {} - 失败次数: {}", clientIp, ipInfo.attempts);
-    }
 
     /**
      * ✅ 记录登录成功
@@ -206,12 +137,6 @@ public class LoginSecurityService {
             userRepository.save(user);
             
             log.info("✅ 用户登录成功: {} (IP: {})", user.getUsername(), clientIp);
-        }
-
-        // 清除IP失败记录
-        if (clientIp != null && ipFailureCache.containsKey(clientIp)) {
-            ipFailureCache.remove(clientIp);
-            log.debug("🧹 清除IP失败记录: {}", clientIp);
         }
     }
 

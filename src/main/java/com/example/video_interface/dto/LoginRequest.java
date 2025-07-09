@@ -12,4 +12,6 @@ import lombok.NoArgsConstructor;
 public class LoginRequest {
     private String username;
     private String password;
+    private String captcha;    // 验证码
+    private String sessionId;  // 验证码会话ID
 } 

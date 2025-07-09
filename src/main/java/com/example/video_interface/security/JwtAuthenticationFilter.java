@@ -38,7 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         "/api/users/admin/login",
         "/api/users/admin/init",
         "/api/users/admin/check-status",
-        "/api/users/admin/test-login",
         "/error"
     );
 

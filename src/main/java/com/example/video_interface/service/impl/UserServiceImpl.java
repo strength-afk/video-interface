@@ -5,7 +5,9 @@ import com.example.video_interface.dto.RegisterRequest;
 import com.example.video_interface.model.User;
 import com.example.video_interface.repository.UserRepository;
 import com.example.video_interface.security.JwtTokenProvider;
+import com.example.video_interface.service.CaptchaService;
 import com.example.video_interface.service.LoginSecurityService;
+import com.example.video_interface.service.RegistrationLimitService;
 import com.example.video_interface.service.UserService;
 import com.example.video_interface.util.RequestContextUtil;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +40,10 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> stringRedisTemplate;
     private final LoginSecurityService loginSecurityService;
+    private final CaptchaService captchaService;
+    private final RegistrationLimitService registrationLimitService;
 
     /**
      * 用户注册
@@ -52,8 +56,23 @@ public class UserServiceImpl implements UserService {
     public User registerUser(RegisterRequest request) {
         log.info("开始处理用户注册请求: {}", request.getUsername());
 
+        // 获取客户端IP地址
+        String clientIp = RequestContextUtil.getClientIpAddress();
+        log.debug("📍 客户端IP: {}", clientIp);
+
         // 验证请求参数
         validateRegisterRequest(request);
+
+        // 检查IP注册限制
+        if (!registrationLimitService.canRegister(clientIp)) {
+            int currentCount = registrationLimitService.getCurrentCount(clientIp);
+            long resetTime = registrationLimitService.getResetTimeInSeconds(clientIp);
+            int resetHours = (int) Math.ceil(resetTime / 3600.0);
+            
+            log.warn("🚫 IP {} 注册次数已达限制: {}/3，需等待 {} 小时后重试", 
+                clientIp, currentCount, resetHours);
+            throw new IllegalArgumentException("注册频繁，请稍后重试");
+        }
 
         try {
             // 创建新用户
@@ -65,7 +84,14 @@ public class UserServiceImpl implements UserService {
                     .build();
 
             log.info("保存新用户到数据库");
-            return userRepository.save(user);
+            User savedUser = userRepository.save(user);
+            
+            // 记录注册次数
+            int newCount = registrationLimitService.recordRegistration(clientIp);
+            log.info("✅ 用户注册成功: {} (IP: {}), 该IP已注册 {}/3 个账号", 
+                savedUser.getUsername(), clientIp, newCount);
+            
+            return savedUser;
         } catch (Exception e) {
             log.error("用户注册失败: {}", e.getMessage(), e);
             throw new RuntimeException("注册失败，请稍后重试");
@@ -112,9 +138,26 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User loginUser(LoginRequest request) {
-        log.info("处理用户登录请求: {}", request.getUsername());
+        log.info("🔐 处理H5用户登录请求: {}", request.getUsername());
+        
+        // 获取客户端IP地址
+        String clientIp = RequestContextUtil.getClientIpAddress();
+        log.debug("📍 客户端IP: {}", clientIp);
+
+        // 🎯 H5端使用验证码防护，完全不使用账户锁定机制
 
         try {
+            // 🎯 验证码检查（如果提供了验证码信息）
+            if (request.getCaptcha() != null && request.getSessionId() != null) {
+                boolean captchaValid = captchaService.verifyCaptcha(request.getSessionId(), request.getCaptcha());
+                if (!captchaValid) {
+                    log.warn("🚫 验证码验证失败: {} (IP: {})", request.getUsername(), clientIp);
+                    throw new IllegalArgumentException("验证码错误或已过期");
+                }
+                log.debug("✅ 验证码验证通过: {} (IP: {})", request.getUsername(), clientIp);
+            }
+
+            // 🔐 验证用户名和密码
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
@@ -124,15 +167,125 @@ public class UserServiceImpl implements UserService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            // 获取用户信息
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
             
-            // 更新最后登录时间
+            // 检查账号状态
+            if (!user.isEnabled()) {
+                log.warn("❌ 用户账号已被禁用: {}", request.getUsername());
+                throw new IllegalArgumentException("账号已被禁用");
+            }
+
+            // ✅ 登录成功，更新最后登录时间和IP（H5端不处理任何锁定逻辑）
             user.setLastLoginTime(LocalDateTime.now());
+            user.setLastLoginIp(clientIp);
+            
+            log.info("✅ H5用户登录成功: {} (IP: {})", user.getUsername(), clientIp);
             return userRepository.save(user);
+            
         } catch (Exception e) {
-            log.error("用户登录失败: {}", request.getUsername(), e);
-            throw new IllegalArgumentException("用户名或密码错误");
+            log.error("🚨 H5用户登录失败: {} (IP: {}) - 原因: {}", 
+                request.getUsername(), clientIp, e.getMessage());
+            
+            // 🎯 H5端简化错误处理，不记录失败次数，不锁定账户
+            String errorMessage;
+            
+            if (e.getMessage().contains("验证码")) {
+                errorMessage = e.getMessage(); // 保持验证码错误信息
+            } else if (e.getMessage().contains("Bad credentials")) {
+                errorMessage = "密码错误，请重试";
+            } else if (e.getMessage().contains("User not found") || e.getMessage().contains("用户不存在")) {
+                errorMessage = "用户名不存在";
+            } else if (e.getMessage().contains("账号已被禁用")) {
+                errorMessage = "账号已被禁用";
+            } else {
+                errorMessage = "登录失败，请重试";
+            }
+            
+            log.warn("🔍 H5端错误信息: {}", errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * H5端用户登录（无锁定机制）
+     * @param request 登录请求，包含用户名、密码、验证码等信息
+     * @return 登录成功的用户信息
+     * @throws IllegalArgumentException 如果用户名或密码错误或验证码错误
+     */
+    @Override
+    public User h5LoginUser(LoginRequest request) {
+        log.info("🔐 处理H5用户登录请求（无锁定机制）: {}", request.getUsername());
+        
+        // 获取客户端IP地址
+        String clientIp = RequestContextUtil.getClientIpAddress();
+        log.debug("📍 客户端IP: {}", clientIp);
+
+        try {
+            // 🎯 验证码检查（如果提供了验证码信息）
+            if (request.getCaptcha() != null && request.getSessionId() != null) {
+                boolean captchaValid = captchaService.verifyCaptcha(request.getSessionId(), request.getCaptcha());
+                if (!captchaValid) {
+                    log.warn("🚫 验证码验证失败: {} (IP: {})", request.getUsername(), clientIp);
+                    throw new IllegalArgumentException("验证码错误或已过期");
+                }
+                log.debug("✅ 验证码验证通过: {} (IP: {})", request.getUsername(), clientIp);
+            }
+
+            // 🔐 验证用户名和密码
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // 获取用户信息
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+            
+            // 检查账号状态
+            if (!user.isEnabled()) {
+                log.warn("❌ 用户账号已被禁用: {}", request.getUsername());
+                throw new IllegalArgumentException("账号已被禁用");
+            }
+
+            // ✅ 登录成功，更新最后登录时间和IP
+            // 🎯 H5端：不记录失败次数，不使用锁定机制，只更新登录信息
+            user.setLastLoginTime(LocalDateTime.now());
+            user.setLastLoginIp(clientIp);
+            
+            // 重置失败次数（如果之前有的话）
+            user.setFailedLoginAttempts(0);
+            user.setLastFailedLoginTime(null);
+            
+            log.info("✅ H5用户登录成功（无锁定机制）: {} (IP: {})", user.getUsername(), clientIp);
+            return userRepository.save(user);
+            
+        } catch (Exception e) {
+            log.error("🚨 H5用户登录失败: {} (IP: {}) - 原因: {}", 
+                request.getUsername(), clientIp, e.getMessage());
+            
+            // 🎯 H5端：完全不记录失败次数，不锁定账户，不增加失败计数
+            String errorMessage;
+            
+            if (e.getMessage().contains("验证码")) {
+                errorMessage = e.getMessage(); // 保持验证码错误信息
+            } else if (e.getMessage().contains("Bad credentials")) {
+                errorMessage = "密码错误，请重试";
+            } else if (e.getMessage().contains("User not found") || e.getMessage().contains("用户不存在")) {
+                errorMessage = "用户名不存在";
+            } else if (e.getMessage().contains("账号已被禁用")) {
+                errorMessage = "账号已被禁用";
+            } else {
+                errorMessage = "登录失败，请重试";
+            }
+            
+            log.warn("🔍 H5端错误信息（无锁定机制）: {}", errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 
@@ -166,7 +319,7 @@ public class UserServiceImpl implements UserService {
             
             if (remainingTime > 0) {
                 String key = "blacklist:" + token;
-                redisTemplate.opsForValue().set(key, username, remainingTime, TimeUnit.MILLISECONDS);
+                stringRedisTemplate.opsForValue().set(key, username, remainingTime, TimeUnit.MILLISECONDS);
                 log.debug("Token已加入黑名单，用户: {}", username);
             }
         } catch (Exception e) {
@@ -316,11 +469,7 @@ public class UserServiceImpl implements UserService {
         String clientIp = RequestContextUtil.getClientIpAddress();
         log.debug("📍 客户端IP: {}", clientIp);
 
-        // 🛡️ 检查IP是否被锁定
-        if (loginSecurityService.isIpLocked(clientIp)) {
-            log.warn("🚫 IP已被锁定，拒绝登录: {} (IP: {})", request.getUsername(), clientIp);
-            throw new IllegalArgumentException("IP地址已被锁定，请稍后再试");
-        }
+
 
         // 查找用户（先查找用户，即使密码错误也要记录失败次数）
         User admin = null;
@@ -385,8 +534,8 @@ public class UserServiceImpl implements UserService {
             String errorMessage = "管理员登录失败";
             
             try {
-                // 📝 记录登录失败（即使用户不存在也要记录IP失败）
-                boolean accountLocked = loginSecurityService.recordLoginFailure(admin, clientIp);
+                // 📝 记录登录失败
+                boolean accountLocked = loginSecurityService.recordLoginFailure(admin);
                 
                 // 如果是密码错误且用户存在，提供剩余尝试次数信息
                 if (admin != null && e.getMessage().contains("Bad credentials")) {

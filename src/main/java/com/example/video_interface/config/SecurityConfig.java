@@ -82,11 +82,15 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.GET, "/users/check-username").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/check-email").permitAll();
                 
+                // 允许验证码相关的公开端点
+                auth.requestMatchers(HttpMethod.GET, "/users/captcha").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/users/captcha/refresh").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/users/captcha/verify").permitAll();
+                
                 // 允许管理员相关的公开端点
                 auth.requestMatchers(HttpMethod.POST, "/users/admin/login").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/users/admin/init").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/admin/check-status").permitAll();
-                auth.requestMatchers(HttpMethod.POST, "/users/admin/test-login").permitAll();
                 
                 // 其他所有请求需要认证
                 auth.anyRequest().authenticated();

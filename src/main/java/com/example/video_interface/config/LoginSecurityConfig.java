@@ -52,24 +52,7 @@ public class LoginSecurityConfig {
      */
     private int resetWindowHours = 24;
 
-    // 🛡️ IP相关配置
-    /**
-     * 是否启用IP地址锁定
-     * 默认启用
-     */
-    private boolean enableIpLocking = true;
 
-    /**
-     * 单个IP最大失败次数
-     * 默认10次
-     */
-    private int maxIpFailedAttempts = 10;
-
-    /**
-     * IP锁定时间（分钟）
-     * 默认60分钟
-     */
-    private int ipLockDurationMinutes = 60;
 
     // 📧 通知配置
     /**
@@ -105,9 +88,7 @@ public class LoginSecurityConfig {
         log.info("  ├─ 普通用户锁定时间: {} 分钟", lockDurationMinutes);
         log.info("  ├─ 管理员锁定时间: {} 分钟", adminLockDurationMinutes);
         log.info("  ├─ 失败次数重置窗口: {} 小时", resetWindowHours);
-        log.info("  ├─ IP地址锁定: {}", enableIpLocking ? "启用" : "禁用");
-        log.info("  ├─ IP最大失败次数: {}", maxIpFailedAttempts);
-        log.info("  ├─ IP锁定时间: {} 分钟", ipLockDurationMinutes);
+
         log.info("  ├─ 锁定通知: {}", enableLockNotification ? "启用" : "禁用");
         log.info("  └─ 登录日志: {}", enableLoginLogging ? "启用" : "禁用");
 
