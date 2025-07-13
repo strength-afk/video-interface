@@ -30,14 +30,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final List<String> publicPaths = Arrays.asList(
-        "/api/users/register",
-        "/api/users/login",
-        "/api/users/auth",
-        "/api/users/check-username",
-        "/api/users/check-email",
-        "/api/admin/login",
-        "/api/admin/check-status",
-        "/error"
+        "/users/register",
+        "/users/login",
+        "/users/auth",
+        "/users/check-username",
+        "/users/check-email",
+        "/admin/login",
+        "/admin/check-status",
+        "/error",
+        // H5电影相关公开路径
+        "/h5/categories/**",
+        "/h5/regions/**",
+        "/h5/movies/**",
+        "/h5/movies/*/detail-page",
+        "/h5/movies/*/related",
+        "/h5/movies/*/play-permission",
+        "/h5/movies/*/increment-view",
+        "/h5/movies/detail-simple"
     );
 
     @Override
@@ -88,10 +97,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicPath(String path) {
+        // 移除/api前缀进行匹配，因为后端配置了context-path=/api
+        final String pathWithoutApi = path.startsWith("/api") ? path.substring(4) : path;
+        
         boolean isPublic = publicPaths.stream()
             .anyMatch(pattern -> {
-                boolean matches = pathMatcher.match(pattern, path);
-                log.debug("路径匹配检查: {} vs {} = {}", pattern, path, matches);
+                boolean matches = pathMatcher.match(pattern, pathWithoutApi);
+                log.debug("路径匹配检查: {} vs {} = {}", pattern, pathWithoutApi, matches);
                 return matches;
             });
         log.debug("路径 {} 是否为公开路径: {}", path, isPublic);

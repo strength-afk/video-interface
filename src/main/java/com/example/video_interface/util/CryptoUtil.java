@@ -1,6 +1,4 @@
 package com.example.video_interface.util;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +10,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -300,59 +297,49 @@ public class CryptoUtil {
             long timeDiff = Math.abs(currentTime - timestamp);
             
             if (timeDiff > TIMESTAMP_TOLERANCE) {
-                log.warn("请求时间戳超出容差范围: timestamp={}, current={}, diff={}ms, tolerance={}ms", 
-                    timestamp, currentTime, timeDiff, TIMESTAMP_TOLERANCE);
+                log.warn("时间戳超出容差范围: current={}, request={}, diff={}ms", 
+                    currentTime, timestamp, timeDiff);
                 return false;
             }
             
-            // 🔧 标准化JSON数据格式，确保与前端保持一致
-            String normalizedData = "";
-            if (data != null && !data.trim().isEmpty()) {
-                try {
-                    // 解析并重新序列化JSON，确保格式标准化
-                    Object dataObj = objectMapper.readValue(data, Object.class);
-                    normalizedData = objectMapper.writeValueAsString(dataObj);
-                } catch (Exception e) {
-                    // 如果不是有效JSON，直接使用原字符串
-                    normalizedData = data;
-                    log.debug("数据不是有效JSON，使用原字符串: {}", e.getMessage());
-                }
+            // 🔧 URL路径处理：移除API前缀
+            String relativeUrl = url;
+            if (url.startsWith("/api/")) {
+                relativeUrl = url.substring(4); // 移除 "/api" 前缀
             }
             
-            // 🔧 去掉context-path前缀，使用相对路径进行签名验证
-            // 前端使用相对路径，后端也应该使用相对路径来保持一致
-            String relativePath = url;
-            if (url.startsWith("/api")) {
-                relativePath = url.substring(4); // 去掉 "/api" 前缀
+            // 🔧 数据标准化：处理null和空字符串
+            String normalizedData = data;
+            if (data == null || data.trim().isEmpty() || data.equals("null")) {
+                normalizedData = "null";
             }
             
-            // 🔑 多时间窗口验证 - 处理时区边界情况  
+            // 生成签名数据
             String signatureData = String.join("|", 
                 method.toUpperCase(), 
-                relativePath, 
+                relativeUrl, 
                 normalizedData, 
                 String.valueOf(timestamp), 
                 deviceFingerprint
             );
             
-            // 尝试当前时间窗口
+            // 生成动态密钥
             String dynamicKey = generateDynamicKey(timestamp, deviceFingerprint);
             
-            // 🔍 调试动态密钥生成过程（仅开发环境）
-            if (DEBUG_ENABLED) {
-                long currentTimeWindow = timestamp / TIME_WINDOW;
-                String keyMaterial = String.join("|", BASE_SECRET, String.valueOf(currentTimeWindow), deviceFingerprint);
-                log.debug("🔑 动态密钥生成详情:");
-                log.debug("  - 时间戳: {}", timestamp);
-                log.debug("  - 时间窗口: {}", currentTimeWindow);
-                log.debug("  - 基础密钥: [PROTECTED]");
-                log.debug("  - 设备指纹: {}...", deviceFingerprint.substring(0, 8));
-                log.debug("  - 动态密钥: [PROTECTED]");
-                log.debug("🔧 URL路径处理:");
-                log.debug("  - 原始URL: {}", url);
-                log.debug("  - 相对路径: {}", relativePath);
-            }
+            // 🔍 临时调试信息
+            log.info("🔍 签名验证详细调试:");
+            log.info("  - 方法: {}", method.toUpperCase());
+            log.info("  - 原始URL: {}", url);
+            log.info("  - 相对URL: {}", relativeUrl);
+            log.info("  - 原始数据: {}", data);
+            log.info("  - 标准化数据: {}", normalizedData);
+            log.info("  - 时间戳: {}", timestamp);
+            log.info("  - 设备指纹: {}", deviceFingerprint);
+            log.info("  - 签名数据: {}", signatureData);
+            log.info("  - 动态密钥前缀: {}...", dynamicKey.length() > 8 ? dynamicKey.substring(0, 8) : dynamicKey);
+            log.info("  - 接收到的签名: {}", signature);
             
+            // 验证签名
             boolean isValid = hmacVerify(signatureData, signature, dynamicKey);
             
             if (!isValid) {
@@ -372,21 +359,21 @@ public class CryptoUtil {
                     }
                 }
                 
+                // 计算期望的签名
+                String expectedSignature = hmacSign(signatureData, dynamicKey);
+                log.error("❌ 签名验证失败 - 详细对比:");
+                log.error("  - 接收到的签名: {}", signature);
+                log.error("  - 期望的签名: {}", expectedSignature);
+                log.error("  - 签名匹配: {}", signature.equals(expectedSignature));
+                log.error("  - 签名长度匹配: 接收={}, 期望={}", signature.length(), expectedSignature.length());
+                
                 log.warn("请求签名验证失败: method={}, url={}, timestamp={}", method, url, timestamp);
-                log.debug("签名验证详情:");
-                log.debug("  - 原始数据: {}", data != null ? data.substring(0, Math.min(100, data.length())) + "..." : "null");
-                log.debug("  - 标准化数据: {}", normalizedData.substring(0, Math.min(100, normalizedData.length())) + "...");
-                log.debug("  - 签名数据: {}", signatureData);
-                log.debug("  - 动态密钥: {}", dynamicKey.substring(0, 8) + "...");
-                log.debug("  - 接收签名: {}", signature.substring(0, 10) + "...");
-                log.debug("  - 期望签名: {}", hmacSign(signatureData, dynamicKey).substring(0, 10) + "...");
-                log.debug("  - 时间差异: {}ms", timeDiff);
                 return false;
             }
             
             return true;
         } catch (Exception e) {
-            log.error("验证请求签名时发生错误", e);
+            log.error("签名验证异常", e);
             return false;
         }
     }

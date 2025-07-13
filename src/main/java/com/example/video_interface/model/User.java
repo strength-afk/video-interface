@@ -8,12 +8,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * 用户实体类
@@ -35,7 +33,12 @@ public class User implements UserDetails {
         ACTIVE,     // 正常状态
         INACTIVE,   // 未激活状态
         LOCKED,     // 账户被锁定
-        DELETED     // 账户已删除
+        DELETED;    // 账户已删除
+        
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getValue() {
+            return this.name();
+        }
     }
 
     /**
@@ -45,7 +48,12 @@ public class User implements UserDetails {
     public enum UserRole {
         ADMIN,      // 管理员，具有最高权限
         USER,       // 普通用户，具有基本权限
-        VIP         // VIP用户，具有特殊权限
+        VIP;        // VIP用户，具有特殊权限
+        
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getValue() {
+            return this.name();
+        }
     }
 
     @Id

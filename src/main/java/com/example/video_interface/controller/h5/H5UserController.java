@@ -3,9 +3,15 @@ package com.example.video_interface.controller.h5;
 import com.example.video_interface.dto.h5.H5LoginRequest;
 import com.example.video_interface.dto.h5.H5RegisterRequest;
 import com.example.video_interface.model.User;
+
 import com.example.video_interface.security.JwtTokenProvider;
 import com.example.video_interface.service.h5.IH5UserService;
 import com.example.video_interface.util.RequestContextUtil;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +31,7 @@ import java.util.Map;
 public class H5UserController {
     private final IH5UserService h5UserService;
     private final JwtTokenProvider tokenProvider;
+    private final RedisTemplate<String, String> stringRedisTemplate;
 
     /**
      * 用户注册
@@ -33,7 +40,7 @@ public class H5UserController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody H5RegisterRequest request) {
-        log.info("📝 接收到用户注册请求: {}", request.getUsername());
+        log.info(" 接收到用户注册请求: {}", request.getUsername());
         
         try {
             // 执行注册
@@ -79,46 +86,37 @@ public class H5UserController {
             Map<String, Object> loginResult = h5UserService.h5Login(request);
             User user = (User) loginResult.get("user");
             boolean needCaptcha = (boolean) loginResult.get("needCaptcha");
+            boolean kickedOtherDevice = (boolean) loginResult.get("kickedOtherDevice");
             
             // 生成token
             String token = tokenProvider.generateToken(user);
+            
+            // 记录设备登录信息
+            recordUserLoginDevice(user.getUsername(), token);
             
             // 构造返回数据
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("user", user);
             response.put("needCaptcha", needCaptcha);
+            response.put("kickedOtherDevice", kickedOtherDevice);
             
-            log.info("用户登录成功: {}", user.getUsername());
+            log.info("用户登录成功: {} (顶掉其他设备: {})", user.getUsername(), kickedOtherDevice);
             return ResponseEntity.ok(response);
             
+
         } catch (IllegalArgumentException e) {
             log.warn("用户登录失败: {} - {}", request.getUsername(), e.getMessage());
             
-            // 解析错误信息中的needCaptcha状态
-            String errorMessage = e.getMessage();
+            // 检查是否需要验证码
             boolean needCaptcha = false;
-            
-            if (errorMessage.contains("needCaptcha")) {
-                try {
-                    // 移除大括号并分割字符串
-                    String[] parts = errorMessage.substring(1, errorMessage.length() - 1).split(", ");
-                    Map<String, String> errorMap = new HashMap<>();
-                    for (String part : parts) {
-                        String[] keyValue = part.split("=");
-                        errorMap.put(keyValue[0], keyValue[1]);
-                    }
-                    
-                    errorMessage = errorMap.get("message");
-                    needCaptcha = Boolean.parseBoolean(errorMap.get("needCaptcha"));
-                } catch (Exception ex) {
-                    log.error("解析错误信息失败: {}", ex.getMessage());
-                }
+            if (e.getMessage().contains("请输入验证码")) {
+                needCaptcha = true;
             }
             
             return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
-                "message", errorMessage,
+                "message", e.getMessage(),
                 "needCaptcha", needCaptcha
             ));
         } catch (Exception e) {
@@ -141,6 +139,10 @@ public class H5UserController {
             String token = RequestContextUtil.getAuthToken();
             if (token != null) {
                 h5UserService.logout(token);
+                
+                // 清除设备登录记录
+                clearUserLoginDevice(token);
+                
                 log.info(" 用户登出成功");
             }
             return ResponseEntity.ok(Map.of("success", true));
@@ -201,6 +203,76 @@ public class H5UserController {
                 "success", false,
                 "message", "更新信息失败，请稍后重试"
             ));
+        }
+    }
+
+    /**
+     * 记录用户登录设备信息
+     * @param username 用户名
+     * @param token 用户token
+     */
+    private void recordUserLoginDevice(String username, String token) {
+        try {
+            String deviceId = getDeviceFingerprint();
+            if (deviceId != null) {
+                String userDeviceKey = "user:device:" + username;
+                String userTokenKey = "user:token:" + username;
+                String deviceUserKey = "device:user:" + deviceId;
+                
+                // 记录设备信息，24小时过期
+                stringRedisTemplate.opsForValue().set(userDeviceKey, deviceId, 24, TimeUnit.HOURS);
+                stringRedisTemplate.opsForValue().set(userTokenKey, token, 24, TimeUnit.HOURS);
+                stringRedisTemplate.opsForValue().set(deviceUserKey, username, 24, TimeUnit.HOURS);
+                
+                log.debug("记录用户 {} 登录设备信息，设备ID: {}", username, deviceId);
+            }
+        } catch (Exception e) {
+            log.warn("记录用户设备信息失败: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 获取设备指纹
+     * @return 设备指纹，如果不存在则返回null
+     */
+    private String getDeviceFingerprint() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                HttpServletRequest request = attrs.getRequest();
+                String deviceId = request.getHeader("X-Device-ID");
+                log.debug("获取设备指纹: {}", deviceId);
+                return deviceId;
+            }
+        } catch (Exception e) {
+            log.debug("无法获取设备指纹: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 清除用户设备登录记录
+     * @param token 用户token
+     */
+    private void clearUserLoginDevice(String token) {
+        try {
+            String username = tokenProvider.getUsernameFromJWT(token);
+            String deviceId = getDeviceFingerprint();
+            
+            if (username != null && deviceId != null) {
+                String userDeviceKey = "user:device:" + username;
+                String userTokenKey = "user:token:" + username;
+                String deviceUserKey = "device:user:" + deviceId;
+                
+                // 清除设备记录
+                stringRedisTemplate.delete(userDeviceKey);
+                stringRedisTemplate.delete(userTokenKey);
+                stringRedisTemplate.delete(deviceUserKey);
+                
+                log.debug("清除用户 {} 的设备登录记录，设备ID: {}", username, deviceId);
+            }
+        } catch (Exception e) {
+            log.warn("清除用户设备信息失败: {}", e.getMessage());
         }
     }
 } 

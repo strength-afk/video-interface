@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,9 +44,11 @@ public class JwtTokenProvider {
     private SecretKeySpec aesKey;
 
     private final UserDetailsService userDetailsService;
+    private final RedisTemplate<String, String> stringRedisTemplate;
 
-    public JwtTokenProvider(UserDetailsService userDetailsService) {
+    public JwtTokenProvider(UserDetailsService userDetailsService, RedisTemplate<String, String> stringRedisTemplate) {
         this.userDetailsService = userDetailsService;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @PostConstruct
@@ -158,22 +161,36 @@ public class JwtTokenProvider {
                     .parseClaimsJws(decryptedToken)
                     .getBody();
             
-            // 验证设备指纹
-            String tokenDevice = claims.get("device", String.class);
-            String currentDevice = getDeviceFingerprint();
-            
-            if (tokenDevice != null && currentDevice != null && !tokenDevice.equals(currentDevice)) {
-                log.warn("设备指纹不匹配: token={}, current={}", 
-                    tokenDevice.substring(0, 8) + "...", 
-                    currentDevice.substring(0, 8) + "...");
-                return false;
-            }
-            
             // 验证Token类型
             String tokenType = claims.get("type", String.class);
             if (!"access_token".equals(tokenType)) {
                 log.warn("无效的Token类型: {}", tokenType);
                 return false;
+            }
+            
+            // 验证Redis中的设备信息
+            String username = claims.getSubject();
+            String currentDevice = getDeviceFingerprint();
+            
+            if (username != null && currentDevice != null) {
+                String userDeviceKey = "user:device:" + username;
+                String userTokenKey = "user:token:" + username;
+                
+                String storedDevice = stringRedisTemplate.opsForValue().get(userDeviceKey);
+                String storedToken = stringRedisTemplate.opsForValue().get(userTokenKey);
+                
+                // 检查设备是否匹配
+                if (storedDevice != null && !storedDevice.equals(currentDevice)) {
+                    log.warn("用户 {} 设备不匹配: 存储设备={}, 当前设备={}", 
+                        username, storedDevice, currentDevice);
+                    return false;
+                }
+                
+                // 检查token是否匹配
+                if (storedToken != null && !storedToken.equals(encryptedToken)) {
+                    log.warn("用户 {} token不匹配，可能已被其他设备顶掉", username);
+                    return false;
+                }
             }
             
             log.debug("Enhanced JWT token validation successful");

@@ -3,13 +3,11 @@ package com.example.video_interface.config;
 import com.example.video_interface.filter.DecryptionFilter;
 import com.example.video_interface.security.CustomUserDetailsService;
 import com.example.video_interface.security.JwtAuthenticationFilter;
-import com.example.video_interface.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -38,12 +36,9 @@ import java.util.Arrays;
 // CORS配置统一在SecurityConfig中管理
 public class SecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final DecryptionFilter decryptionFilter;
-    private final Environment environment;
-
     @Value("${cors.allowed-origins}")
     private String[] allowedOrigins;
 
@@ -82,6 +77,20 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.POST, "/users/auth").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/check-username").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/users/check-email").permitAll();
+
+                // 允许h5端口访问
+                auth.requestMatchers(HttpMethod.GET, "/h5/categories/*").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/h5/regions/*").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/*").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/h5/movies/*").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/*/trial/*").permitAll();
+                
+                // 添加更具体的电影详情和播放相关路径
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/*/detail-page").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/*/related").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/h5/movies/*/play-permission").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/h5/movies/*/increment-view").permitAll();
+                
                 
                 // 允许验证码相关的公开端点
                 auth.requestMatchers(HttpMethod.GET, "/users/captcha").permitAll();
@@ -92,6 +101,9 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.POST, "/admin/login").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/admin/init").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/admin/check-status").permitAll();
+                
+                // 管理员接口需要认证
+                auth.requestMatchers("/admin/**").authenticated();
                 
                 // 其他所有请求需要认证
                 auth.anyRequest().authenticated();

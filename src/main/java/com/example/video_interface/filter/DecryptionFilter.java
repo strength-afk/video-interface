@@ -13,10 +13,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +37,7 @@ public class DecryptionFilter implements Filter {
     @Value("${app.crypto.debug.enabled:false}")
     private boolean debugEnabled;
 
+    @SuppressWarnings("null")
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -48,7 +47,7 @@ public class DecryptionFilter implements Filter {
         
         // 🔧 防止重复处理同一个请求
         if (httpRequest.getAttribute("DECRYPTION_PROCESSED") != null) {
-            log.debug("📄 请求已经过解密处理，直接通过");
+            log.debug("请求已经过解密处理，直接通过");
             chain.doFilter(request, response);
             return;
         }
@@ -56,7 +55,7 @@ public class DecryptionFilter implements Filter {
         // 跳过错误页面请求
         String requestPath = httpRequest.getRequestURI();
         if (requestPath.contains("/error")) {
-            log.debug("📄 跳过错误页面请求: {}", requestPath);
+            log.debug("跳过错误页面请求: {}", requestPath);
             chain.doFilter(request, response);
             return;
         }
@@ -78,11 +77,11 @@ public class DecryptionFilter implements Filter {
         try {
             // 读取请求体
             String requestBody = getRequestBody(httpRequest);
-            log.debug("🔍 读取到请求体: length={}, content={}", 
+            log.debug("读取到请求体: length={}, content={}", 
                 requestBody != null ? requestBody.length() : 0, requestBody);
             
             if (!StringUtils.hasText(requestBody)) {
-                log.debug("📄 请求体为空，直接通过");
+                log.debug("请求体为空，直接通过");
                 chain.doFilter(request, response);
                 return;
             }
@@ -93,44 +92,26 @@ public class DecryptionFilter implements Filter {
             String deviceId = httpRequest.getHeader("X-Device-ID");
             String clientType = httpRequest.getHeader("X-Client-Type");
             
-            // 🔒 生产级模式：不再使用固定设备指纹，要求真实设备标识
-            if (false) { // 移除开发模式逻辑
-                String fixedFingerprint = "dev_admin_fingerprint";
-                String deviceSalt = "jiuban_device_fingerprint";
-                try {
-                    java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-                    byte[] hashBytes = md.digest((fixedFingerprint + deviceSalt).getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                    StringBuilder sb = new StringBuilder();
-                    for (byte b : hashBytes) {
-                        sb.append(String.format("%02x", b));
-                    }
-                    deviceId = sb.toString();
-                    log.debug("🔧 开发模式：使用固定设备指纹 {}", deviceId);
-                } catch (Exception e) {
-                    log.warn("生成固定设备指纹失败", e);
-                }
-            }
-            
-            log.debug("🔍 处理请求: method={}, url={}, clientType={}, hasSignature={}, signatureRequired={}", 
+            log.debug("处理请求: method={}, url={}, clientType={}, hasSignature={}, signatureRequired={}", 
                 method, httpRequest.getRequestURI(), clientType, signature != null, SIGNATURE_REQUIRED);
             
             // 🔍 详细调试传输数据
-            log.debug("📡 请求头调试:");
+            log.debug("请求头调试:");
             log.debug("  - Content-Type: {}", httpRequest.getContentType());
             log.debug("  - Content-Length: {}", httpRequest.getContentLength());
             log.debug("  - X-Timestamp: {}", timestamp);
             log.debug("  - X-Signature: {}", signature);
             log.debug("  - X-Device-ID: {}", deviceId);
             log.debug("  - X-Client-Type: {}", clientType);
-            log.debug("📦 请求体原始数据 (前100字符): {}", 
+            log.debug("请求体原始数据 (前100字符): {}", 
                 requestBody != null ? requestBody.substring(0, Math.min(100, requestBody.length())) + "..." : "null");
             
             // 🔒 生产级安全：始终执行完整的签名验证和加密处理
-            log.debug("🔐 生产级模式：执行完整的安全验证流程");
+            log.debug("生产级模式：执行完整的安全验证流程");
             
             // 如果没有加密头信息，直接通过
             if (!StringUtils.hasText(timestamp) || !StringUtils.hasText(signature) || !StringUtils.hasText(deviceId)) {
-                log.debug("📄 普通请求，无需解密验证");
+                log.debug("普通请求，无需解密验证");
                 CachedBodyHttpServletRequest processedRequest = new CachedBodyHttpServletRequest(httpRequest, requestBody);
                 processedRequest.setAttribute("DECRYPTION_PROCESSED", true);
                 chain.doFilter(processedRequest, response);
@@ -160,15 +141,15 @@ public class DecryptionFilter implements Filter {
                 }
             } else {
                 // 🚨 这个分支不应该被执行（SIGNATURE_REQUIRED = true）
-                log.error("🚨 安全警告：签名验证被意外跳过！");
+                log.error("安全警告：签名验证被意外跳过！");
                 throw new RuntimeException("安全验证失败");
             }
             
-            log.debug("✅ 请求签名验证成功");
+            log.debug("请求签名验证成功");
             
             // 检查是否包含加密数据
             if (!requestBody.contains("_crypto")) {
-                log.debug("📄 请求无加密数据");
+                log.debug("请求无加密数据");
                 CachedBodyHttpServletRequest processedRequest = new CachedBodyHttpServletRequest(httpRequest, requestBody);
                 processedRequest.setAttribute("DECRYPTION_PROCESSED", true);
                 chain.doFilter(processedRequest, response);
@@ -176,13 +157,13 @@ public class DecryptionFilter implements Filter {
             }
             
             // 🔒 生产级安全：始终执行完整的解密验证流程
-            log.debug("🔐 执行标准解密流程");
+            log.debug("执行标准解密流程");
             
             // 解密敏感数据
             Map<String, Object> decryptedData = cryptoUtil.decryptSensitiveData(requestBody, deviceId);
             String decryptedJson = objectMapper.writeValueAsString(decryptedData);
             
-            log.info("🔓 成功解密请求数据: {} {}", method, httpRequest.getRequestURI());
+            log.info("成功解密请求数据: {} {}", method, httpRequest.getRequestURI());
             
             // 🔧 标记请求已经过解密处理，防止重复处理
             CachedBodyHttpServletRequest processedRequest = new CachedBodyHttpServletRequest(httpRequest, decryptedJson);
@@ -217,7 +198,9 @@ public class DecryptionFilter implements Filter {
                 "http://localhost:5173",
                 "http://localhost:3000", 
                 "http://localhost:4000",
-                "http://localhost:8080"
+                "http://localhost:8080",
+                "http://192.168.0.118:3000",
+                "http://192.168.0.118:4000"
             };
             
             for (String allowedOrigin : allowedOrigins) {
@@ -300,27 +283,6 @@ public class DecryptionFilter implements Filter {
         @Override
         public int read() throws IOException {
             return cachedBodyInputStream.read();
-        }
-    }
-
-    /**
-     * 获取字段的默认值（仅用于开发模式）
-     * @param fieldName 字段名
-     * @return 默认值
-     */
-    private String getDefaultValueForField(String fieldName) {
-        switch (fieldName.toLowerCase()) {
-            case "username":
-                return "admin";
-            case "password":
-                return "admin123";
-            case "email":
-                return "admin@example.com";
-            case "phone":
-            case "phonenumber":
-                return "13800138000";
-            default:
-                return "default_" + fieldName;
         }
     }
 } 

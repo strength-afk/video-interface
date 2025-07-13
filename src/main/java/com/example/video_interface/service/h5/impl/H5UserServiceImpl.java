@@ -22,9 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+
 
 /**
  * H5用户服务实现类
@@ -179,8 +186,18 @@ public class H5UserServiceImpl implements IH5UserService {
             
             // 检查账号状态
             if (!user.isEnabled()) {
-                log.warn("用户账号已被禁用: {}", request.getUsername());
-                throw new IllegalArgumentException("账号已被禁用");
+                log.warn("用户账户已被禁用: {}", request.getUsername());
+                throw new IllegalArgumentException("账户已被禁用");
+            }
+
+            // 获取设备指纹
+            String deviceId = getDeviceFingerprint();
+            log.debug("用户 {} 登录设备ID: {}", request.getUsername(), deviceId);
+
+            // 处理单设备登录冲突（自动顶掉其他设备）
+            boolean kickedOtherDevice = handleDeviceConflict(user.getUsername(), deviceId);
+            if (kickedOtherDevice) {
+                log.info("用户 {} 登录时顶掉了其他设备的会话", user.getUsername());
             }
 
             // 登录成功，更新最后登录时间和IP
@@ -191,14 +208,16 @@ public class H5UserServiceImpl implements IH5UserService {
             // 重置登录失败次数
             h5LoginFailureService.resetLoginFailures(clientIp);
             
-            log.info("H5用户登录成功: {} (IP: {})", user.getUsername(), clientIp);
+            log.info("H5用户登录成功: {} (IP: {}, 设备: {})", user.getUsername(), clientIp, deviceId);
             
             // 返回用户信息和needCaptcha状态
             return Map.of(
                 "user", user,
-                "needCaptcha", false
+                "needCaptcha", false,
+                "kickedOtherDevice", kickedOtherDevice
             );
             
+
         } catch (Exception e) {
             log.error("H5用户登录失败: {} (IP: {}) - 原因: {}", 
                 request.getUsername(), clientIp, e.getMessage());
@@ -215,19 +234,18 @@ public class H5UserServiceImpl implements IH5UserService {
                 errorMessage = "密码错误，请重试";
             } else if (e.getMessage().contains("User not found") || e.getMessage().contains("用户不存在")) {
                 errorMessage = "用户名不存在";
-            } else if (e.getMessage().contains("账号已被禁用")) {
-                errorMessage = "账号已被禁用";
+            } else if (e.getMessage().contains("User is disabled") || e.getMessage().contains("账户已被禁用")) {
+                errorMessage = "账户已被禁用";
+            } else if (e.getMessage().contains("User account is locked")) {
+                errorMessage = "账号被锁定";
             } else {
                 errorMessage = "登录失败，请重试";
             }
             
             log.warn("H5端错误信息: {}", errorMessage);
             
-            // 抛出异常时包含needCaptcha状态
-            throw new IllegalArgumentException(Map.of(
-                "message", errorMessage,
-                "needCaptcha", needCaptcha
-            ).toString());
+            // 直接抛出包含错误信息的异常
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 
@@ -295,5 +313,71 @@ public class H5UserServiceImpl implements IH5UserService {
         }
 
         return userRepository.save(currentUser);
+    }
+
+    /**
+     * 获取设备指纹
+     * @return 设备指纹，如果不存在则返回null
+     */
+    private String getDeviceFingerprint() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                HttpServletRequest request = attrs.getRequest();
+                String deviceId = request.getHeader("X-Device-ID");
+                log.debug("获取设备指纹: {}", deviceId);
+                return deviceId;
+            }
+        } catch (Exception e) {
+            log.debug("无法获取设备指纹: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 处理设备登录冲突，自动顶掉其他设备
+     * @param username 用户名
+     * @param currentDeviceId 当前设备ID
+     * @return 如果顶掉了其他设备返回true，否则返回false
+     */
+    private boolean handleDeviceConflict(String username, String currentDeviceId) {
+        if (currentDeviceId == null) {
+            log.debug("设备ID为空，跳过设备冲突检查");
+            return false;
+        }
+
+        String userDeviceKey = "user:device:" + username;
+        String userTokenKey = "user:token:" + username;
+        String deviceUserKey = "device:user:" + currentDeviceId;
+        
+        // 获取用户当前登录的设备
+        String oldDevice = stringRedisTemplate.opsForValue().get(userDeviceKey);
+        
+        if (oldDevice == null) {
+            log.debug("用户 {} 未在任何设备登录", username);
+            return false;
+        }
+        
+        if (oldDevice.equals(currentDeviceId)) {
+            log.debug("用户 {} 已在当前设备登录", username);
+            return false;
+        }
+        
+        // 顶掉其他设备
+        log.info("用户 {} 在新设备登录，顶掉原设备: {} -> {}", username, oldDevice, currentDeviceId);
+        
+        // 将旧设备的token加入黑名单
+        String oldToken = stringRedisTemplate.opsForValue().get(userTokenKey);
+        if (oldToken != null) {
+            String blacklistKey = "blacklist:" + oldToken;
+            stringRedisTemplate.opsForValue().set(blacklistKey, username, 24, TimeUnit.HOURS);
+            log.debug("将用户 {} 的旧token加入黑名单", username);
+        }
+        
+        // 清除旧设备记录
+        String oldDeviceUserKey = "device:user:" + oldDevice;
+        stringRedisTemplate.delete(oldDeviceUserKey);
+        
+        return true;
     }
 } 
