@@ -87,6 +87,14 @@ public class ActivationCode {
     @Comment("充值金额，仅充值激活码有效")
     private BigDecimal rechargeAmount;
     
+    @Column(name = "recharge_package_id")
+    @Comment("充值套餐ID，关联充值套餐表")
+    private Long rechargePackageId;
+    
+    @Column(name = "recharge_package_name", length = 50)
+    @Comment("充值套餐名称，冗余字段便于查询")
+    private String rechargePackageName;
+    
     @Column(name = "used_by")
     @Comment("使用用户ID")
     private Long usedBy;

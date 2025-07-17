@@ -81,6 +81,7 @@ public class SecurityConfig {
                 // 允许h5端口访问
                 auth.requestMatchers(HttpMethod.GET, "/h5/categories/*").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/h5/regions/*").permitAll();
+                auth.requestMatchers(HttpMethod.GET, "/h5/system-config/info").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/h5/movies/*").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/h5/movies/*").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/h5/movies/*/trial/*").permitAll();
@@ -90,6 +91,25 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.GET, "/h5/movies/*/related").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/h5/movies/*/play-permission").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/h5/movies/*/increment-view").permitAll();
+                
+                // 购买相关接口需要认证
+                auth.requestMatchers(HttpMethod.POST, "/h5/movies/purchase").authenticated();
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/*/purchased").authenticated();
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/user/*/purchased*").authenticated();
+                
+                // 点赞相关接口需要认证
+                auth.requestMatchers(HttpMethod.POST, "/h5/movies/like").authenticated();
+                auth.requestMatchers(HttpMethod.POST, "/h5/movies/unlike").authenticated();
+                auth.requestMatchers(HttpMethod.GET, "/h5/movies/liked").authenticated();
+                
+                // 收藏相关接口需要认证
+                auth.requestMatchers("/h5/favorites/**").authenticated();
+                
+                // 订单相关接口需要认证
+                auth.requestMatchers("/orders/**").authenticated();
+                
+                // 允许支付相关接口匿名访问
+                auth.requestMatchers("/payment/idr/**").permitAll();
                 
                 
                 // 允许验证码相关的公开端点

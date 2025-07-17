@@ -207,6 +207,110 @@ public class H5UserController {
     }
 
     /**
+     * 修改当前用户密码
+     * @param body { oldPassword: 原密码, newPassword: 新密码 }
+     * @return 修改结果
+     */
+    @PutMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body) {
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+        if (oldPassword == null || newPassword == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "参数不能为空"
+            ));
+        }
+        try {
+            h5UserService.changePassword(oldPassword, newPassword);
+            log.info("用户修改密码成功");
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "密码修改成功"
+            ));
+        } catch (IllegalArgumentException e) {
+            log.warn("用户修改密码失败: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            log.error("用户修改密码发生错误: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "密码修改失败，请稍后重试"
+            ));
+        }
+    }
+
+    /**
+     * H5端会员激活码激活接口
+     * @param body { activationCode: "xxxx" }
+     * @return 激活结果
+     */
+    @PostMapping("/activate-vip-code")
+    public ResponseEntity<?> activateVipCode(@RequestBody Map<String, String> body) {
+        String activationCode = body.get("activationCode");
+        if (activationCode == null || activationCode.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "激活码不能为空"));
+        }
+        try {
+            User currentUser = h5UserService.getCurrentUser();
+            Map<String, Object> result = h5UserService.activateVipCode(activationCode, currentUser.getId());
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "激活失败，请稍后重试"));
+        }
+    }
+
+    /**
+     * H5端充值激活码充值接口
+     * @param body { code: "xxxx" }
+     * @return 充值结果
+     */
+    @PostMapping("/recharge")
+    public ResponseEntity<?> rechargeByCode(@RequestBody Map<String, String> body) {
+        String code = body.get("code");
+        if (code == null || code.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "充值码不能为空"));
+        }
+        try {
+            User currentUser = h5UserService.getCurrentUser();
+            Map<String, Object> result = h5UserService.rechargeByCode(code, currentUser.getId());
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "充值失败，请稍后重试"));
+        }
+    }
+
+    /**
+     * 绑定邮箱
+     */
+    @PostMapping("/bind-email")
+    public ResponseEntity<?> bindEmail(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String code = body.get("code");
+        try {
+            h5UserService.bindEmail(email, code);
+            // 返回更新后的用户信息
+            User updatedUser = h5UserService.getCurrentUser();
+            return ResponseEntity.ok(Map.of(
+                "success", true, 
+                "message", "邮箱绑定成功",
+                "user", updatedUser
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "绑定失败，请稍后重试"));
+        }
+    }
+
+    /**
      * 记录用户登录设备信息
      * @param username 用户名
      * @param token 用户token

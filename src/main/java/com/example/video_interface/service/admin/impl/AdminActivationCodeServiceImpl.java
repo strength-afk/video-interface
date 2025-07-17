@@ -3,6 +3,8 @@ package com.example.video_interface.service.admin.impl;
 import com.example.video_interface.dto.admin.AdminActivationCodeDTO;
 import com.example.video_interface.model.ActivationCode;
 import com.example.video_interface.repository.ActivationCodeRepository;
+import com.example.video_interface.repository.UserRepository;
+import com.example.video_interface.repository.RechargePackageRepository;
 import com.example.video_interface.service.admin.IAdminActivationCodeService;
 import com.example.video_interface.util.RequestContextUtil;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 public class AdminActivationCodeServiceImpl implements IAdminActivationCodeService {
     
     private final ActivationCodeRepository activationCodeRepository;
+    private final UserRepository userRepository;
+    private final RechargePackageRepository rechargePackageRepository;
     
     @Override
     public Page<AdminActivationCodeDTO> getActivationCodeList(String codeType, String codeStatus, 
@@ -51,7 +55,23 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
         }
         
         Page<ActivationCode> activationCodes = activationCodeRepository.findByConditions(type, status, batchNumber, keyword, pageable);
-        return activationCodes.map(AdminActivationCodeDTO::fromEntity);
+        
+        // 转换为DTO并补充用户信息
+        return activationCodes.map(activationCode -> {
+            AdminActivationCodeDTO dto = AdminActivationCodeDTO.fromEntity(activationCode);
+            
+            // 如果有使用用户ID，查询用户名
+            if (activationCode.getUsedBy() != null) {
+                try {
+                    userRepository.findById(activationCode.getUsedBy())
+                            .ifPresent(user -> dto.setUsedByUsername(user.getUsername()));
+                } catch (Exception e) {
+                    log.warn("查询用户信息失败，用户ID: {}", activationCode.getUsedBy(), e);
+                }
+            }
+            
+            return dto;
+        });
     }
     
     @Override
@@ -61,7 +81,19 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
         ActivationCode activationCode = activationCodeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("激活码不存在"));
         
-        return AdminActivationCodeDTO.fromEntity(activationCode);
+        AdminActivationCodeDTO dto = AdminActivationCodeDTO.fromEntity(activationCode);
+        
+        // 如果有使用用户ID，查询用户名
+        if (activationCode.getUsedBy() != null) {
+            try {
+                userRepository.findById(activationCode.getUsedBy())
+                        .ifPresent(user -> dto.setUsedByUsername(user.getUsername()));
+            } catch (Exception e) {
+                log.warn("查询用户信息失败，用户ID: {}", activationCode.getUsedBy(), e);
+            }
+        }
+        
+        return dto;
     }
     
 
@@ -109,22 +141,29 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
             }
         }
         
-        // 处理充值金额，支持多种数据类型
-        BigDecimal rechargeAmount = null;
-        Object rechargeAmountObj = params.get("rechargeAmount");
-        if (rechargeAmountObj != null) {
-            if (rechargeAmountObj instanceof BigDecimal) {
-                rechargeAmount = (BigDecimal) rechargeAmountObj;
-            } else if (rechargeAmountObj instanceof Number) {
-                rechargeAmount = new BigDecimal(rechargeAmountObj.toString());
-            } else if (rechargeAmountObj instanceof String) {
+        // 处理充值套餐ID，支持多种数据类型
+        final Long rechargePackageId;
+        Object rechargePackageIdObj = params.get("rechargePackageId");
+        if (rechargePackageIdObj != null) {
+            if (rechargePackageIdObj instanceof Long) {
+                rechargePackageId = (Long) rechargePackageIdObj;
+            } else if (rechargePackageIdObj instanceof Number) {
+                rechargePackageId = ((Number) rechargePackageIdObj).longValue();
+            } else if (rechargePackageIdObj instanceof String) {
                 try {
-                    rechargeAmount = new BigDecimal((String) rechargeAmountObj);
+                    rechargePackageId = Long.valueOf((String) rechargePackageIdObj);
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("充值金额格式无效");
+                    throw new IllegalArgumentException("充值套餐ID格式无效");
                 }
+            } else {
+                rechargePackageId = null;
             }
+        } else {
+            rechargePackageId = null;
         }
+        
+        // 充值金额将通过充值套餐获取
+        BigDecimal rechargeAmount = null;
         
         // 处理激活码长度，支持多种数据类型
         Integer codeLength = null;
@@ -177,8 +216,24 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
         if (type == ActivationCode.CodeType.VIP && (vipDuration == null || vipDuration <= 0)) {
             throw new IllegalArgumentException("VIP激活码必须设置时长");
         }
-        if (type == ActivationCode.CodeType.RECHARGE && (rechargeAmount == null || rechargeAmount.compareTo(BigDecimal.ZERO) <= 0)) {
-            throw new IllegalArgumentException("充值激活码必须设置金额");
+        
+        // 处理充值套餐信息
+        final String finalRechargePackageName;
+        final Long finalRechargePackageId;
+        if (type == ActivationCode.CodeType.RECHARGE) {
+            if (rechargePackageId != null) {
+                // 如果选择了充值套餐，验证套餐是否存在并获取金额和名称
+                var rechargePackage = rechargePackageRepository.findById(rechargePackageId)
+                        .orElseThrow(() -> new IllegalArgumentException("充值套餐不存在，ID: " + rechargePackageId));
+                rechargeAmount = rechargePackage.getRechargeAmount();
+                finalRechargePackageName = rechargePackage.getName();
+                finalRechargePackageId = rechargePackageId;
+            } else {
+                throw new IllegalArgumentException("充值激活码必须选择充值套餐");
+            }
+        } else {
+            finalRechargePackageName = null;
+            finalRechargePackageId = null;
         }
         
         List<ActivationCode> activationCodes = new ArrayList<>();
@@ -196,6 +251,8 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
                     .codeStatus(ActivationCode.CodeStatus.UNUSED)
                     .vipDuration(vipDuration)
                     .rechargeAmount(rechargeAmount)
+                    .rechargePackageId(finalRechargePackageId)
+                    .rechargePackageName(finalRechargePackageName)
                     .batchNumber(batchNumber)
                     .remark(remark)
                     .createdBy(currentUserId)
@@ -232,8 +289,16 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
         
         // 更新允许修改的字段
         existingActivationCode.setRemark(activationCodeDTO.getRemark());
-        existingActivationCode.setExpireAt(activationCodeDTO.getExpireAt());
-        existingActivationCode.setCodeStatus(activationCodeDTO.getCodeStatus());
+        
+        // 处理过期时间
+        if (activationCodeDTO.getExpireAt() != null) {
+            existingActivationCode.setExpireAt(activationCodeDTO.getExpireAt());
+        }
+        
+        // 处理状态 - 如果前端传递的是字符串，需要转换
+        if (activationCodeDTO.getCodeStatus() != null) {
+            existingActivationCode.setCodeStatus(activationCodeDTO.getCodeStatus());
+        }
         
         ActivationCode updatedActivationCode = activationCodeRepository.save(existingActivationCode);
         log.info("激活码更新成功 - ID: {}", updatedActivationCode.getId());
@@ -401,8 +466,23 @@ public class AdminActivationCodeServiceImpl implements IAdminActivationCodeServi
         }
         
         Page<ActivationCode> activationCodes = activationCodeRepository.findByConditions(type, status, batchNumber, null, Pageable.unpaged());
+        
         return activationCodes.getContent().stream()
-                .map(AdminActivationCodeDTO::fromEntity)
+                .map(activationCode -> {
+                    AdminActivationCodeDTO dto = AdminActivationCodeDTO.fromEntity(activationCode);
+                    
+                    // 如果有使用用户ID，查询用户名
+                    if (activationCode.getUsedBy() != null) {
+                        try {
+                            userRepository.findById(activationCode.getUsedBy())
+                                    .ifPresent(user -> dto.setUsedByUsername(user.getUsername()));
+                        } catch (Exception e) {
+                            log.warn("查询用户信息失败，用户ID: {}", activationCode.getUsedBy(), e);
+                        }
+                    }
+                    
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
     

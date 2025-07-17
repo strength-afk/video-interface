@@ -461,3 +461,113 @@ src/
 - **API设计**：RESTful风格，统一的响应格式
 
 详细功能说明请参考：[管理员管理模块文档](README_ADMIN_MANAGEMENT.md)
+
+## iDataRiver 支付集成说明
+
+### 1. 配置
+在 `src/main/resources/application.properties` 中添加：
+```
+# iDataRiver 支付API配置
+idr.api.base-url=https://open.idatariver.com
+idr.api.secret=你的商户Secret
+```
+
+### 2. 支付接口说明
+所有接口均在 `/api/payment/idr` 路径下，供前端调用。
+
+#### 2.1 创建商品订单
+- **接口**：POST `/api/payment/idr/order/create`
+- **参数**（JSON）：
+  - `projectId`：项目ID（必填）
+  - `skuId`：商品ID（必填）
+  - `quantity`：购买数量（必填，默认1）
+  - `contactInfo`：联系方式（必填，建议邮箱/手机号，默认：BakerBrenda6834@outlook.com）
+- **返回**：下单结果（包含订单ID等信息）
+
+#### 2.2 获取订单支付链接
+- **接口**：POST `/api/payment/idr/order/pay`
+- **参数**（JSON）：
+  - `orderId`：订单ID（必填）
+  - `method`：支付方式（必填，需从订单详情接口获取）
+  - `redirectUrl`：支付成功后跳转链接（选填）
+  - `callbackUrl`：支付/退款回调通知链接（选填，需https域名）
+- **返回**：支付链接等信息
+
+#### 2.3 查询订单详情
+- **接口**：GET `/api/payment/idr/order/info?orderId=xxx`
+- **参数**：
+  - `orderId`：订单ID（必填）
+- **返回**：订单详情
+
+#### 2.4 支付/退款回调接口
+- **接口**：POST `/api/payment/idr/order/callback`
+- **参数**：回调数据（JSON，iDataRiver平台自动推送）
+- **返回**：`success` 或 `fail`
+
+### 3. 调用示例
+
+#### 创建订单
+```json
+POST /api/payment/idr/order/create
+{
+  "projectId": "your_project_id",
+  "skuId": "your_sku_id",
+  "quantity": 1,
+  "contactInfo": "user@example.com"
+}
+```
+
+#### 获取支付链接
+```json
+POST /api/payment/idr/order/pay
+{
+  "orderId": "your_order_id",
+  "method": "alipay", // 或wechat等，需查订单详情接口
+  "redirectUrl": "https://yourdomain.com/order/success",
+  "callbackUrl": "https://yourdomain.com/api/payment/idr/order/callback"
+}
+```
+
+#### 查询订单
+```
+GET /api/payment/idr/order/info?orderId=your_order_id
+```
+
+### 4. 回调说明
+- iDataRiver平台支付/退款后会自动POST回调到`callbackUrl`，请保证该接口可公网访问且为https。
+- 回调数据请参考iDataRiver官方文档。
+- 回调时建议主动再次请求订单详情接口，确认订单真实状态。
+
+### 5. 注意事项
+- 商户密钥（idr.api.secret）严禁前端暴露，所有API调用均在后端完成。
+- 支持所有支付方式，method参数需从订单详情接口获取。
+- 联系方式建议填写用户唯一标识（如邮箱、手机号等）。
+- 所有接口返回均含有code字段，0为成功，其他为失败。
+
+如有疑问请联系后端开发或查阅iDataRiver官方文档。
+
+## H5端绑定邮箱功能接口
+
+### 1. 发送邮箱验证码
+- 接口路径：`POST /users/send-email-code`
+- 请求参数：
+  - `email` (string) 邮箱地址
+- 返回值：
+  - `success` (boolean)
+  - `message` (string)
+- 说明：5分钟内同一邮箱只能发送一次验证码，验证码有效期5分钟。
+
+### 2. 绑定邮箱
+- 接口路径：`POST /users/bind-email`
+- 请求参数：
+  - `email` (string) 邮箱地址
+  - `code` (string) 验证码
+- 返回值：
+  - `success` (boolean)
+  - `message` (string)
+- 说明：验证码校验通过后，邮箱将绑定到当前登录用户。
+
+### 3. 前端调用流程
+1. 用户输入邮箱，点击“获取验证码”按钮，调用`/users/send-email-code`。
+2. 用户收到验证码，输入验证码后点击“绑定”，调用`/users/bind-email`。
+3. 成功后前端展示绑定结果。

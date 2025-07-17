@@ -181,4 +181,19 @@ public class H5MovieDetailDTO {
      * 更新时间
      */
     private String updatedAt;
+    
+    /**
+     * 用户是否已购买该电影
+     */
+    private Boolean isPurchased;
+    
+    /**
+     * 用户是否已点赞该电影
+     */
+    private Boolean isLiked;
+    
+    /**
+     * 用户是否已收藏该电影
+     */
+    private Boolean isFavorited;
 } 

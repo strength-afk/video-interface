@@ -1,11 +1,12 @@
 package com.example.video_interface.dto.h5;
 
+import com.example.video_interface.model.UserMoviePurchase;
 import lombok.Data;
 
-import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
- * H5端VIP电影单片购买请求DTO
+ * H5端电影购买请求DTO
  */
 @Data
 public class H5MoviePurchaseRequest {
@@ -13,17 +14,30 @@ public class H5MoviePurchaseRequest {
     /**
      * 电影ID
      */
-    @NotNull(message = "电影ID不能为空")
     private Long movieId;
     
     /**
      * 用户ID
      */
-    @NotNull(message = "用户ID不能为空")
     private Long userId;
     
     /**
-     * 支付方式：WECHAT-微信支付，ALIPAY-支付宝
+     * 支付方式
      */
-    private String paymentMethod = "WECHAT";
+    private UserMoviePurchase.PaymentMethod paymentMethod;
+    
+    /**
+     * 支付金额
+     */
+    private BigDecimal amount;
+    
+    /**
+     * 订单ID（可选，系统生成）
+     */
+    private String orderId;
+    
+    /**
+     * 备注
+     */
+    private String remark;
 } 

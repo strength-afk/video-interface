@@ -149,6 +149,13 @@ public class User implements UserDetails {
     @Comment("用户角色：ADMIN-管理员，USER-普通用户，VIP-VIP用户")
     private UserRole role = UserRole.USER;
 
+    public LocalDateTime getVipExpireAt() {
+        return this.vipExpireTime;
+    }
+    public void setVipExpireAt(LocalDateTime vipExpireAt) {
+        this.vipExpireTime = vipExpireAt;
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

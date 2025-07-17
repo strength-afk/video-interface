@@ -91,7 +91,11 @@ public class AdminActivationCodeController {
                     codeType, codeStatus, batchNumber, keyword, pageRequest);
             
             log.info("获取激活码列表成功，总数: {}", activationCodes.getTotalElements());
-            return ResponseEntity.ok(activationCodes);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", activationCodes,
+                "message", "查询成功"
+            ));
             
         } catch (Exception e) {
             log.error("获取激活码列表失败: {}", e.getMessage(), e);
@@ -114,7 +118,11 @@ public class AdminActivationCodeController {
         try {
             AdminActivationCodeDTO activationCode = activationCodeService.getActivationCodeById(id);
             log.info("获取激活码详情成功 - ID: {}", id);
-            return ResponseEntity.ok(activationCode);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", activationCode,
+                "message", "查询成功"
+            ));
             
         } catch (IllegalArgumentException e) {
             log.warn("获取激活码详情失败 - ID: {} - {}", id, e.getMessage());
@@ -145,7 +153,11 @@ public class AdminActivationCodeController {
         try {
             Map<String, Object> result = activationCodeService.batchCreateActivationCodes(params);
             log.info("批量创建激活码成功 - 数量: {}", result.get("count"));
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", result,
+                "message", "批量创建成功"
+            ));
             
         } catch (IllegalArgumentException e) {
             log.warn("批量创建激活码失败: {}", e.getMessage());
@@ -174,7 +186,11 @@ public class AdminActivationCodeController {
         try {
             AdminActivationCodeDTO updatedActivationCode = activationCodeService.updateActivationCode(activationCodeDTO);
             log.info("激活码更新成功 - ID: {}", updatedActivationCode.getId());
-            return ResponseEntity.ok(updatedActivationCode);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", updatedActivationCode,
+                "message", "更新成功"
+            ));
             
         } catch (IllegalArgumentException e) {
             log.warn("激活码更新失败: {}", e.getMessage());
@@ -219,7 +235,11 @@ public class AdminActivationCodeController {
             
             boolean result = activationCodeService.deleteActivationCode(id);
             log.info("激活码删除成功 - ID: {}", id);
-            return ResponseEntity.ok(Map.of("success", result));
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", Map.of("success", result),
+                "message", "删除成功"
+            ));
             
         } catch (IllegalArgumentException e) {
             log.warn("激活码删除失败: {}", e.getMessage());
@@ -258,7 +278,11 @@ public class AdminActivationCodeController {
             
             boolean result = activationCodeService.batchDeleteActivationCodes(ids);
             log.info("批量删除激活码成功 - 数量: {}", ids.size());
-            return ResponseEntity.ok(Map.of("success", result));
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", Map.of("success", result),
+                "message", "批量删除成功"
+            ));
             
         } catch (IllegalArgumentException e) {
             log.warn("批量删除激活码失败: {}", e.getMessage());
@@ -303,7 +327,11 @@ public class AdminActivationCodeController {
             
             boolean result = activationCodeService.toggleActivationCodeStatus(id);
             log.info("激活码状态切换成功 - ID: {}", id);
-            return ResponseEntity.ok(Map.of("success", result));
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", Map.of("success", result),
+                "message", "状态切换成功"
+            ));
             
         } catch (IllegalArgumentException e) {
             log.warn("激活码状态切换失败: {}", e.getMessage());
@@ -331,7 +359,11 @@ public class AdminActivationCodeController {
         try {
             Map<String, Object> statistics = activationCodeService.getActivationCodeStatistics();
             log.info("获取激活码统计信息成功");
-            return ResponseEntity.ok(statistics);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", statistics,
+                "message", "查询成功"
+            ));
             
         } catch (Exception e) {
             log.error("获取激活码统计信息发生错误: {}", e.getMessage(), e);
@@ -354,7 +386,11 @@ public class AdminActivationCodeController {
         try {
             Map<String, Object> statistics = activationCodeService.getActivationCodeStatisticsByType(codeType);
             log.info("获取激活码统计信息成功 - 类型: {}", codeType);
-            return ResponseEntity.ok(statistics);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", statistics,
+                "message", "查询成功"
+            ));
             
         } catch (Exception e) {
             log.error("获取激活码统计信息发生错误 - 类型: {} - {}", codeType, e.getMessage(), e);
@@ -383,7 +419,11 @@ public class AdminActivationCodeController {
                     codeType, codeStatus, batchNumber);
             
             log.info("导出激活码成功 - 数量: {}", activationCodes.size());
-            return ResponseEntity.ok(activationCodes);
+            return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "data", activationCodes,
+                "message", "导出成功"
+            ));
             
         } catch (Exception e) {
             log.error("导出激活码发生错误: {}", e.getMessage(), e);
@@ -422,8 +462,9 @@ public class AdminActivationCodeController {
             log.info("激活码生成成功: {}", generatedCode);
             
             return ResponseEntity.ok(Map.of(
-                "success", true,
-                "code", generatedCode
+                "code", 200,
+                "data", Map.of("code", generatedCode),
+                "message", "生成成功"
             ));
             
         } catch (Exception e) {

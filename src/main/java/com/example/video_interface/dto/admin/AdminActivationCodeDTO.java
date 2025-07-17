@@ -50,9 +50,24 @@ public class AdminActivationCodeDTO {
     private BigDecimal rechargeAmount;
     
     /**
+     * 充值套餐ID
+     */
+    private Long rechargePackageId;
+    
+    /**
+     * 充值套餐名称
+     */
+    private String rechargePackageName;
+    
+    /**
      * 使用用户ID
      */
     private Long usedBy;
+    
+    /**
+     * 使用用户名
+     */
+    private String usedByUsername;
     
     /**
      * 使用时间
@@ -102,6 +117,8 @@ public class AdminActivationCodeDTO {
         dto.setCodeStatusDesc(activationCode.getCodeStatus().getDescription());
         dto.setVipDuration(activationCode.getVipDuration());
         dto.setRechargeAmount(activationCode.getRechargeAmount());
+        dto.setRechargePackageId(activationCode.getRechargePackageId());
+        dto.setRechargePackageName(activationCode.getRechargePackageName());
         dto.setUsedBy(activationCode.getUsedBy());
         dto.setUsedAt(activationCode.getUsedAt());
         dto.setExpireAt(activationCode.getExpireAt());
@@ -124,6 +141,8 @@ public class AdminActivationCodeDTO {
         activationCode.setCodeStatus(this.codeStatus);
         activationCode.setVipDuration(this.vipDuration);
         activationCode.setRechargeAmount(this.rechargeAmount);
+        activationCode.setRechargePackageId(this.rechargePackageId);
+        activationCode.setRechargePackageName(this.rechargePackageName);
         activationCode.setUsedBy(this.usedBy);
         activationCode.setUsedAt(this.usedAt);
         activationCode.setExpireAt(this.expireAt);

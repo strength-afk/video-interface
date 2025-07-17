@@ -4,6 +4,8 @@ import com.example.video_interface.dto.h5.H5MovieDTO;
 import com.example.video_interface.dto.h5.H5MovieDetailDTO;
 import com.example.video_interface.dto.h5.H5MoviePlayRequest;
 import com.example.video_interface.dto.h5.H5MoviePlayResponse;
+import com.example.video_interface.dto.h5.H5MoviePurchaseRequest;
+import com.example.video_interface.dto.h5.H5MoviePurchaseResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -214,6 +216,14 @@ public interface IH5MovieService {
     boolean unlikeMovie(Long movieId, Long userId);
     
     /**
+     * 检查用户是否已点赞电影
+     * @param movieId 电影ID
+     * @param userId 用户ID
+     * @return 是否已点赞
+     */
+    boolean checkUserLiked(Long movieId, Long userId);
+    
+    /**
      * 收藏电影
      * @param movieId 电影ID
      * @param userId 用户ID
@@ -271,9 +281,10 @@ public interface IH5MovieService {
      * 获取相关推荐电影
      * @param movieId 电影ID
      * @param limit 限制数量
+     * @param offset 随机偏移量
      * @return 相关推荐电影列表
      */
-    List<H5MovieDetailDTO> getRelatedMovies(Long movieId, Integer limit);
+    List<H5MovieDetailDTO> getRelatedMovies(Long movieId, Integer limit, Integer offset);
     
     /**
      * 增加观看次数
@@ -298,6 +309,30 @@ public interface IH5MovieService {
      * @return 是否有试看权限
      */
     boolean hasTrialPermission(Long movieId, Long userId);
+    
+    // ==================== 电影购买功能 ====================
+    /**
+     * 检查用户是否已购买电影
+     * @param userId 用户ID
+     * @param movieId 电影ID
+     * @return 是否已购买
+     */
+    boolean hasUserPurchasedMovie(Long userId, Long movieId);
+    
+    /**
+     * 获取用户购买的电影列表（分页）
+     * @param userId 用户ID
+     * @param pageable 分页参数
+     * @return 购买的电影列表
+     */
+    Page<H5MovieDTO> getUserPurchasedMovies(Long userId, Pageable pageable);
+    
+    /**
+     * 获取用户购买的电影ID列表
+     * @param userId 用户ID
+     * @return 电影ID列表
+     */
+    List<Long> getUserPurchasedMovieIds(Long userId);
     
     /**
      * 电影观看权限信息

@@ -1,28 +1,61 @@
 package com.example.video_interface.dto.h5;
 
+import com.example.video_interface.model.UserMoviePurchase;
 import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
- * H5端VIP电影单片购买响应DTO
+ * H5端电影购买响应DTO
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class H5MoviePurchaseResponse {
     
     /**
-     * 是否成功
+     * 购买记录ID
      */
-    private Boolean success;
+    private Long purchaseId;
     
     /**
-     * 消息
+     * 电影ID
      */
-    private String message;
+    private Long movieId;
+    
+    /**
+     * 电影标题
+     */
+    private String movieTitle;
+    
+    /**
+     * 电影封面
+     */
+    private String movieCover;
+    
+    /**
+     * 用户ID
+     */
+    private Long userId;
+    
+    /**
+     * 支付方式
+     */
+    private UserMoviePurchase.PaymentMethod paymentMethod;
+    
+    /**
+     * 支付金额
+     */
+    private BigDecimal amount;
+    
+    /**
+     * 购买时间
+     */
+    private LocalDateTime purchaseTime;
+    
+    /**
+     * 购买状态
+     */
+    private UserMoviePurchase.PurchaseStatus status;
     
     /**
      * 订单ID
@@ -30,22 +63,17 @@ public class H5MoviePurchaseResponse {
     private String orderId;
     
     /**
-     * 支付金额
+     * 备注
      */
-    private String amount;
+    private String remark;
     
     /**
-     * 支付二维码URL（用于扫码支付）
+     * 是否购买成功
      */
-    private String qrCodeUrl;
+    private Boolean success;
     
     /**
-     * 支付链接（用于H5支付）
+     * 错误消息
      */
-    private String paymentUrl;
-    
-    /**
-     * 支付状态：PENDING-待支付，SUCCESS-支付成功，FAILED-支付失败
-     */
-    private String paymentStatus;
+    private String errorMessage;
 } 

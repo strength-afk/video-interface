@@ -45,4 +45,35 @@ public interface IH5UserService {
      * @return 更新后的用户信息
      */
     User updateCurrentUser(Map<String, String> userData);
+
+    /**
+     * 激活会员激活码
+     * @param activationCode 激活码
+     * @param userId 用户ID
+     * @return 激活结果信息
+     */
+    Map<String, Object> activateVipCode(String activationCode, Long userId);
+
+    /**
+     * 使用充值激活码充值
+     * @param code 充值激活码
+     * @param userId 用户ID
+     * @return 充值结果信息
+     */
+    Map<String, Object> rechargeByCode(String code, Long userId);
+
+    /**
+     * 修改当前用户密码
+     * @param oldPassword 原密码
+     * @param newPassword 新密码
+     * @throws IllegalArgumentException 如果原密码错误或新密码不合法
+     */
+    void changePassword(String oldPassword, String newPassword);
+
+    /**
+     * 绑定邮箱
+     * @param email 邮箱地址
+     * @param code 验证码
+     */
+    void bindEmail(String email, String code);
 } 

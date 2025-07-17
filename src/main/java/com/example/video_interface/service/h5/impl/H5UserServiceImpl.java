@@ -2,7 +2,9 @@ package com.example.video_interface.service.h5.impl;
 
 import com.example.video_interface.dto.h5.H5LoginRequest;
 import com.example.video_interface.dto.h5.H5RegisterRequest;
+import com.example.video_interface.model.ActivationCode;
 import com.example.video_interface.model.User;
+import com.example.video_interface.repository.ActivationCodeRepository;
 import com.example.video_interface.repository.UserRepository;
 import com.example.video_interface.security.JwtTokenProvider;
 import com.example.video_interface.service.common.ICaptchaService;
@@ -21,16 +23,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
 
 
 /**
@@ -50,6 +48,7 @@ public class H5UserServiceImpl implements IH5UserService {
     private final ICaptchaService captchaService;
     private final IRegistrationLimitService registrationLimitService;
     private final IH5LoginFailureService h5LoginFailureService;
+    private final ActivationCodeRepository activationCodeRepository;
 
     /**
      * 用户注册
@@ -313,6 +312,164 @@ public class H5UserServiceImpl implements IH5UserService {
         }
 
         return userRepository.save(currentUser);
+    }
+
+    /**
+     * 激活VIP激活码
+     * @param activationCode 激活码
+     * @param userId 用户ID
+     * @return 激活结果
+     */
+    @Override
+    @Transactional
+    public Map<String, Object> activateVipCode(String activationCode, Long userId) {
+        // 1. 校验激活码
+        ActivationCode code = activationCodeRepository.findByCode(activationCode)
+                .orElseThrow(() -> new IllegalArgumentException("激活码不存在"));
+        if (code.getCodeType() != ActivationCode.CodeType.VIP) {
+            throw new IllegalArgumentException("激活码类型错误");
+        }
+        if (code.getCodeStatus() != ActivationCode.CodeStatus.UNUSED) {
+            throw new IllegalArgumentException("激活码已被使用或已失效");
+        }
+        if (code.getExpireAt() != null && code.getExpireAt().isBefore(LocalDateTime.now())) {
+            code.setCodeStatus(ActivationCode.CodeStatus.EXPIRED);
+            activationCodeRepository.save(code);
+            throw new IllegalArgumentException("激活码已过期");
+        }
+        // 2. 校验用户
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        // 3. 激活码绑定用户，设置为已使用
+        code.setCodeStatus(ActivationCode.CodeStatus.USED);
+        code.setUsedBy(userId);
+        code.setUsedAt(LocalDateTime.now());
+        activationCodeRepository.save(code);
+        // 4. 给用户增加VIP时长
+        Integer days = code.getVipDuration() != null ? code.getVipDuration() : 30;
+        if (user.getVipExpireAt() == null || user.getVipExpireAt().isBefore(LocalDateTime.now())) {
+            user.setVipExpireAt(LocalDateTime.now().plusDays(days));
+        } else {
+            user.setVipExpireAt(user.getVipExpireAt().plusDays(days));
+        }
+        user.setIsVip(true);
+        userRepository.save(user);
+        // 5. 返回结果
+        return Map.of(
+            "success", true,
+            "message", "激活成功，VIP已开通",
+            "vipExpireAt", user.getVipExpireAt()
+        );
+    }
+
+    /**
+     * 使用充值激活码充值
+     * @param code 充值激活码
+     * @param userId 用户ID
+     * @return 充值结果
+     */
+    @Override
+    @Transactional
+    public Map<String, Object> rechargeByCode(String code, Long userId) {
+        // 1. 校验激活码
+        ActivationCode activationCode = activationCodeRepository.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("充值码不存在"));
+        if (activationCode.getCodeType() != ActivationCode.CodeType.RECHARGE) {
+            throw new IllegalArgumentException("充值码类型错误");
+        }
+        if (activationCode.getCodeStatus() != ActivationCode.CodeStatus.UNUSED) {
+            throw new IllegalArgumentException("充值码已被使用或已失效");
+        }
+        if (activationCode.getExpireAt() != null && activationCode.getExpireAt().isBefore(LocalDateTime.now())) {
+            activationCode.setCodeStatus(ActivationCode.CodeStatus.EXPIRED);
+            activationCodeRepository.save(activationCode);
+            throw new IllegalArgumentException("充值码已过期");
+        }
+        
+        // 2. 校验用户
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        
+        // 3. 获取充值金额
+        if (activationCode.getRechargeAmount() == null) {
+            throw new IllegalArgumentException("充值码金额无效");
+        }
+        java.math.BigDecimal rechargeAmount = activationCode.getRechargeAmount();
+        
+        // 4. 激活码绑定用户，设置为已使用
+        activationCode.setCodeStatus(ActivationCode.CodeStatus.USED);
+        activationCode.setUsedBy(userId);
+        activationCode.setUsedAt(LocalDateTime.now());
+        activationCodeRepository.save(activationCode);
+        
+        // 5. 给用户增加余额
+        java.math.BigDecimal currentBalance = user.getAccountBalance() != null ? user.getAccountBalance() : java.math.BigDecimal.ZERO;
+        user.setAccountBalance(currentBalance.add(rechargeAmount));
+        userRepository.save(user);
+        
+        // 6. 返回结果
+        return Map.of(
+            "success", true,
+            "message", "充值成功，余额已增加",
+            "rechargeAmount", rechargeAmount,
+            "newBalance", user.getAccountBalance()
+        );
+    }
+
+    /**
+     * 修改密码
+     * @param oldPassword 原密码
+     * @param newPassword 新密码
+     */
+    @Override
+    @Transactional
+    public void changePassword(String oldPassword, String newPassword) {
+        User currentUser = getCurrentUser();
+        // 校验原密码
+        if (!passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
+            log.warn("用户{}修改密码失败：原密码错误", currentUser.getUsername());
+            throw new IllegalArgumentException("原密码错误");
+        }
+        // 校验新密码长度
+        if (newPassword == null || newPassword.length() < 6 || newPassword.length() > 20) {
+            throw new IllegalArgumentException("新密码长度必须在6-20个字符之间");
+        }
+        // 加密新密码并保存
+        currentUser.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(currentUser);
+        log.info("用户{}修改密码成功", currentUser.getUsername());
+    }
+
+    /**
+     * 绑定邮箱
+     * @param email 邮箱地址
+     * @param code 验证码
+     */
+    @Override
+    public void bindEmail(String email, String code) {
+        if (email == null || !email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+            throw new IllegalArgumentException("邮箱格式不正确");
+        }
+        if (code == null || code.length() != 6) {
+            throw new IllegalArgumentException("验证码格式不正确");
+        }
+        // 校验验证码
+        String redisKey = "email:code:" + email;
+        String realCode = stringRedisTemplate.opsForValue().get(redisKey);
+        if (realCode == null || !realCode.equals(code)) {
+            throw new IllegalArgumentException("验证码错误或已过期");
+        }
+        // 校验邮箱唯一性
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("该邮箱已被绑定");
+        }
+        // 绑定邮箱到当前用户
+        User currentUser = getCurrentUser();
+        currentUser.setEmail(email);
+        userRepository.save(currentUser);
+        // 删除验证码
+        stringRedisTemplate.delete(redisKey);
+        log.info("用户{}成功绑定邮箱：{}", currentUser.getUsername(), email);
     }
 
     /**

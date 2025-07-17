@@ -283,8 +283,14 @@ public class H5MovieController {
     @PostMapping("/like")
     public ResponseEntity<Boolean> likeMovie(@RequestParam Long movieId, @RequestParam Long userId) {
         log.info("点赞电影，电影ID: {}, 用户ID: {}", movieId, userId);
-        boolean success = movieService.likeMovie(movieId, userId);
-        return ResponseEntity.ok(success);
+        
+        try {
+            boolean success = movieService.likeMovie(movieId, userId);
+            return ResponseEntity.ok(success);
+        } catch (Exception e) {
+            log.error("点赞电影异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     /**
@@ -293,8 +299,30 @@ public class H5MovieController {
     @PostMapping("/unlike")
     public ResponseEntity<Boolean> unlikeMovie(@RequestParam Long movieId, @RequestParam Long userId) {
         log.info("取消点赞电影，电影ID: {}, 用户ID: {}", movieId, userId);
-        boolean success = movieService.unlikeMovie(movieId, userId);
-        return ResponseEntity.ok(success);
+        
+        try {
+            boolean success = movieService.unlikeMovie(movieId, userId);
+            return ResponseEntity.ok(success);
+        } catch (Exception e) {
+            log.error("取消点赞电影异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * 检查用户是否已点赞电影
+     */
+    @GetMapping("/liked")
+    public ResponseEntity<Boolean> checkUserLiked(@RequestParam Long movieId, @RequestParam Long userId) {
+        log.debug("检查用户点赞状态，电影ID: {}, 用户ID: {}", movieId, userId);
+        
+        try {
+            boolean liked = movieService.checkUserLiked(movieId, userId);
+            return ResponseEntity.ok(liked);
+        } catch (Exception e) {
+            log.error("检查用户点赞状态异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     /**
@@ -303,8 +331,14 @@ public class H5MovieController {
     @PostMapping("/favorite")
     public ResponseEntity<Boolean> favoriteMovie(@RequestParam Long movieId, @RequestParam Long userId) {
         log.info("收藏电影，电影ID: {}, 用户ID: {}", movieId, userId);
-        boolean success = movieService.favoriteMovie(movieId, userId);
-        return ResponseEntity.ok(success);
+        
+        try {
+            boolean success = movieService.favoriteMovie(movieId, userId);
+            return ResponseEntity.ok(success);
+        } catch (Exception e) {
+            log.error("收藏电影异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     /**
@@ -313,8 +347,14 @@ public class H5MovieController {
     @PostMapping("/unfavorite")
     public ResponseEntity<Boolean> unfavoriteMovie(@RequestParam Long movieId, @RequestParam Long userId) {
         log.info("取消收藏电影，电影ID: {}, 用户ID: {}", movieId, userId);
-        boolean success = movieService.unfavoriteMovie(movieId, userId);
-        return ResponseEntity.ok(success);
+        
+        try {
+            boolean success = movieService.unfavoriteMovie(movieId, userId);
+            return ResponseEntity.ok(success);
+        } catch (Exception e) {
+            log.error("取消收藏电影异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     /**
@@ -392,11 +432,12 @@ public class H5MovieController {
     @GetMapping("/{movieId}/related")
     public ResponseEntity<List<H5MovieDetailDTO>> getRelatedMovies(
             @PathVariable Long movieId,
-            @RequestParam(defaultValue = "4") Integer limit) {
-        log.debug("获取相关推荐电影，电影ID: {}, 限制数量: {}", movieId, limit);
+            @RequestParam(defaultValue = "4") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
+        log.debug("获取相关推荐电影，电影ID: {}, 限制数量: {}, 偏移量: {}", movieId, limit, offset);
         
         try {
-            List<H5MovieDetailDTO> relatedMovies = movieService.getRelatedMovies(movieId, limit);
+            List<H5MovieDetailDTO> relatedMovies = movieService.getRelatedMovies(movieId, limit, offset);
             return ResponseEntity.ok(relatedMovies);
         } catch (IllegalArgumentException e) {
             log.warn("获取相关推荐电影失败: {}", e.getMessage());
@@ -467,6 +508,64 @@ public class H5MovieController {
             return ResponseEntity.ok(hasPermission);
         } catch (Exception e) {
             log.error("检查试看权限异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    // ==================== 电影购买功能接口 ====================
+    
+    /**
+     * 检查用户是否已购买电影
+     */
+    @GetMapping("/{movieId}/purchased")
+    public ResponseEntity<Boolean> checkUserPurchased(
+            @PathVariable Long movieId,
+            @RequestParam Long userId) {
+        
+        log.debug("检查用户是否已购买电影，电影ID: {}, 用户ID: {}", movieId, userId);
+        
+        try {
+            boolean hasPurchased = movieService.hasUserPurchasedMovie(userId, movieId);
+            return ResponseEntity.ok(hasPurchased);
+        } catch (Exception e) {
+            log.error("检查购买状态异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * 获取用户购买的电影列表
+     */
+    @GetMapping("/user/{userId}/purchased")
+    public ResponseEntity<Page<H5MovieDTO>> getUserPurchasedMovies(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        
+        log.info("获取用户购买的电影列表，用户ID: {}, 页码: {}, 每页数量: {}", userId, page, size);
+        
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<H5MovieDTO> movies = movieService.getUserPurchasedMovies(userId, pageable);
+            return ResponseEntity.ok(movies);
+        } catch (Exception e) {
+            log.error("获取用户购买电影列表异常: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * 获取用户购买的电影ID列表
+     */
+    @GetMapping("/user/{userId}/purchased/ids")
+    public ResponseEntity<List<Long>> getUserPurchasedMovieIds(@PathVariable Long userId) {
+        log.debug("获取用户购买的电影ID列表，用户ID: {}", userId);
+        
+        try {
+            List<Long> movieIds = movieService.getUserPurchasedMovieIds(userId);
+            return ResponseEntity.ok(movieIds);
+        } catch (Exception e) {
+            log.error("获取用户购买电影ID列表异常: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }

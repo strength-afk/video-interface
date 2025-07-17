@@ -6,15 +6,21 @@ import com.example.video_interface.dto.h5.H5RegionDTO;
 import com.example.video_interface.dto.h5.H5MovieDetailDTO;
 import com.example.video_interface.dto.h5.H5MoviePlayRequest;
 import com.example.video_interface.dto.h5.H5MoviePlayResponse;
+import com.example.video_interface.dto.h5.H5MoviePurchaseRequest;
+import com.example.video_interface.dto.h5.H5MoviePurchaseResponse;
 import com.example.video_interface.model.Movie;
 import com.example.video_interface.model.MovieCategory;
 import com.example.video_interface.model.Region;
 import com.example.video_interface.model.User;
+import com.example.video_interface.model.UserMoviePurchase;
+import com.example.video_interface.model.Order;
 import com.example.video_interface.repository.MovieRepository;
 import com.example.video_interface.repository.UserRepository;
+import com.example.video_interface.repository.UserMoviePurchaseRepository;
+import com.example.video_interface.repository.OrderRepository;
 import com.example.video_interface.service.h5.IH5MovieService;
+import com.example.video_interface.service.h5.IH5UserFavoriteService;
 import com.example.video_interface.service.common.IMinioService;
-import com.example.video_interface.service.h5.IH5MoviePurchaseService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +30,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -41,10 +45,11 @@ public class H5MovieServiceImpl implements IH5MovieService {
     
     private final MovieRepository movieRepository;
     private final UserRepository userRepository;
+    private final UserMoviePurchaseRepository userMoviePurchaseRepository;
+    private final OrderRepository orderRepository;
     private final ObjectMapper objectMapper;
     private final IMinioService minioService;
-    @Autowired
-    private IH5MoviePurchaseService moviePurchaseService;
+    private final IH5UserFavoriteService userFavoriteService;
     
     @Override
     public H5MovieDTO getMovieById(Long id) {
@@ -376,35 +381,77 @@ public class H5MovieServiceImpl implements IH5MovieService {
     }
     
     @Override
+    public boolean checkUserLiked(Long movieId, Long userId) {
+        // 由于当前系统没有用户点赞记录表，我们暂时返回false
+        // 在实际项目中，应该查询用户点赞记录表
+        log.debug("检查用户点赞状态，电影ID: {}, 用户ID: {}", movieId, userId);
+        return false;
+    }
+    
+    @Override
     @Transactional
     public boolean favoriteMovie(Long movieId, Long userId) {
-        Movie movie = movieRepository.findById(movieId).orElse(null);
-        User user = userRepository.findById(userId).orElse(null);
+        log.debug("收藏电影，电影ID: {}, 用户ID: {}", movieId, userId);
         
-        if (movie == null || user == null || movie.getStatus() != Movie.MovieStatus.ACTIVE) {
+        try {
+            Movie movie = movieRepository.findById(movieId).orElse(null);
+            User user = userRepository.findById(userId).orElse(null);
+            
+            if (movie == null || user == null || movie.getStatus() != Movie.MovieStatus.ACTIVE) {
+                log.warn("电影或用户不存在，或电影状态异常，电影ID: {}, 用户ID: {}", movieId, userId);
+                return false;
+            }
+            
+            // 使用收藏服务添加收藏
+            boolean success = userFavoriteService.addFavorite(userId, movieId, "MOVIE", movie.getTitle(), movie.getCover());
+            
+            if (success) {
+                // 增加电影收藏次数
+                movie.setFavorites(movie.getFavorites() + 1);
+                movieRepository.save(movie);
+                log.info("收藏电影成功，电影ID: {}, 用户ID: {}", movieId, userId);
+            }
+            
+            return success;
+            
+        } catch (Exception e) {
+            log.error("收藏电影失败，电影ID: {}, 用户ID: {}, 错误: {}", movieId, userId, e.getMessage(), e);
             return false;
         }
-        
-        movie.setFavorites(movie.getFavorites() + 1);
-        movieRepository.save(movie);
-        return true;
     }
     
     @Override
     @Transactional
     public boolean unfavoriteMovie(Long movieId, Long userId) {
-        Movie movie = movieRepository.findById(movieId).orElse(null);
-        User user = userRepository.findById(userId).orElse(null);
+        log.debug("取消收藏电影，电影ID: {}, 用户ID: {}", movieId, userId);
         
-        if (movie == null || user == null || movie.getStatus() != Movie.MovieStatus.ACTIVE) {
+        try {
+            Movie movie = movieRepository.findById(movieId).orElse(null);
+            User user = userRepository.findById(userId).orElse(null);
+            
+            if (movie == null || user == null || movie.getStatus() != Movie.MovieStatus.ACTIVE) {
+                log.warn("电影或用户不存在，或电影状态异常，电影ID: {}, 用户ID: {}", movieId, userId);
+                return false;
+            }
+            
+            // 使用收藏服务取消收藏
+            boolean success = userFavoriteService.removeFavorite(userId, movieId, "MOVIE");
+            
+            if (success) {
+                // 减少电影收藏次数
+                if (movie.getFavorites() > 0) {
+                    movie.setFavorites(movie.getFavorites() - 1);
+                    movieRepository.save(movie);
+                }
+                log.info("取消收藏电影成功，电影ID: {}, 用户ID: {}", movieId, userId);
+            }
+            
+            return success;
+            
+        } catch (Exception e) {
+            log.error("取消收藏电影失败，电影ID: {}, 用户ID: {}, 错误: {}", movieId, userId, e.getMessage(), e);
             return false;
         }
-        
-        if (movie.getFavorites() > 0) {
-            movie.setFavorites(movie.getFavorites() - 1);
-            movieRepository.save(movie);
-        }
-        return true;
     }
     
     @Override
@@ -435,8 +482,15 @@ public class H5MovieServiceImpl implements IH5MovieService {
                 return new MovieWatchPermission(true, "VIP用户可以观看", movie.getTrialDuration(), 
                                               movie.getChargeType().name(), movie.getChargeType().getDescription());
             } else {
-                return new MovieWatchPermission(false, "该电影为VIP电影，请开通VIP或单片购买", movie.getTrialDuration(), 
-                                              movie.getChargeType().name(), movie.getChargeType().getDescription());
+                // 检查是否已单片购买该电影
+                boolean hasPurchased = checkMoviePurchase(userId, movieId);
+                if (hasPurchased) {
+                    return new MovieWatchPermission(true, "已购买，可以观看", movie.getTrialDuration(), 
+                                                  movie.getChargeType().name(), movie.getChargeType().getDescription());
+                } else {
+                    return new MovieWatchPermission(false, "该电影为VIP电影，请开通VIP或单片购买", movie.getTrialDuration(), 
+                                                  movie.getChargeType().name(), movie.getChargeType().getDescription());
+                }
             }
         }
         
@@ -585,7 +639,7 @@ public class H5MovieServiceImpl implements IH5MovieService {
             throw new IllegalArgumentException("电影已下架或不存在");
         }
         
-        return convertToDetailDTO(movie);
+        return convertToDetailDTO(movie, null);
     }
     
     @Override
@@ -608,7 +662,7 @@ public class H5MovieServiceImpl implements IH5MovieService {
             }
         }
         
-        return convertToDetailDTO(movie);
+        return convertToDetailDTO(movie, userId);
     }
     
     @Override
@@ -670,7 +724,10 @@ public class H5MovieServiceImpl implements IH5MovieService {
                     // 检查是否已单片购买该电影
                     boolean hasPurchased = checkMoviePurchase(userId, request.getMovieId());
                     
-                    if (!hasPurchased) {
+                    if (hasPurchased) {
+                        // 用户已购买，允许播放
+                        return buildPlayResponse("ALLOWED", "已购买，可完整观看", true, movie, false);
+                    } else {
                         // 检查是否有试看权限
                         if (hasTrialPermission(request.getMovieId(), userId)) {
                             // 提供试看
@@ -722,7 +779,10 @@ public class H5MovieServiceImpl implements IH5MovieService {
                     // 检查是否已单片购买该电影
                     boolean hasPurchased = checkMoviePurchase(userId, request.getMovieId());
                     
-                    if (!hasPurchased) {
+                    if (hasPurchased) {
+                        // 用户已购买，允许播放
+                        return buildPlayResponse("ALLOWED", "已购买，可完整观看", true, movie, false);
+                    } else {
                         // 检查是否有试看权限
                         if (hasTrialPermission(request.getMovieId(), userId)) {
                             // 提供试看
@@ -753,24 +813,85 @@ public class H5MovieServiceImpl implements IH5MovieService {
     }
     
     @Override
-    public List<H5MovieDetailDTO> getRelatedMovies(Long movieId, Integer limit) {
-        log.debug("获取相关推荐电影，电影ID: {}, 限制数量: {}", movieId, limit);
+    public List<H5MovieDetailDTO> getRelatedMovies(Long movieId, Integer limit, Integer offset) {
+        log.debug("获取相关推荐电影，电影ID: {}, 限制数量: {}, 偏移量: {}", movieId, limit, offset);
         
         // 获取当前电影信息
         Movie currentMovie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("电影不存在"));
         
-        // 根据分类和地区获取相关电影
-        List<Movie> relatedMovies = movieRepository.findRelatedMovies(
-                currentMovie.getCategory().getId(),
-                currentMovie.getRegion().getId(),
-                movieId,
-                Movie.MovieStatus.ACTIVE,
-                org.springframework.data.domain.PageRequest.of(0, limit)
-        );
+        List<Movie> allRelatedMovies = new ArrayList<>();
         
-        return relatedMovies.stream()
-                .map(this::convertToDetailDTO)
+        // 方法1：根据分类和地区获取相关电影
+        try {
+            List<Movie> categoryRegionMovies = movieRepository.findRelatedMovies(
+                    currentMovie.getCategory().getId(),
+                    currentMovie.getRegion().getId(),
+                    movieId,
+                    Movie.MovieStatus.ACTIVE,
+                    org.springframework.data.domain.PageRequest.of(0, limit * 2) // 获取更多电影用于随机选择
+            );
+            allRelatedMovies.addAll(categoryRegionMovies);
+        } catch (Exception e) {
+            log.warn("根据分类和地区获取相关电影失败: {}", e.getMessage());
+        }
+        
+        // 方法2：如果方法1没有获取到足够的电影，获取热门电影作为备选
+        if (allRelatedMovies.size() < limit) {
+            try {
+                List<Movie> hotMovies = movieRepository.findHotMoviesByStatus(
+                        Movie.MovieStatus.ACTIVE,
+                        org.springframework.data.domain.PageRequest.of(0, limit * 2)
+                );
+                
+                // 过滤掉当前电影和已经添加的电影
+                List<Movie> additionalMovies = hotMovies.stream()
+                        .filter(movie -> !movie.getId().equals(movieId))
+                        .filter(movie -> allRelatedMovies.stream().noneMatch(rm -> rm.getId().equals(movie.getId())))
+                        .limit(limit - allRelatedMovies.size())
+                        .collect(Collectors.toList());
+                
+                allRelatedMovies.addAll(additionalMovies);
+            } catch (Exception e) {
+                log.warn("获取热门电影作为备选失败: {}", e.getMessage());
+            }
+        }
+        
+        // 方法3：如果还是没有足够的电影，获取最新电影
+        if (allRelatedMovies.size() < limit) {
+            try {
+                List<Movie> newMovies = movieRepository.findNewMoviesByStatus(
+                        Movie.MovieStatus.ACTIVE,
+                        org.springframework.data.domain.PageRequest.of(0, limit * 2)
+                );
+                
+                // 过滤掉当前电影和已经添加的电影
+                List<Movie> additionalMovies = newMovies.stream()
+                        .filter(movie -> !movie.getId().equals(movieId))
+                        .filter(movie -> allRelatedMovies.stream().noneMatch(rm -> rm.getId().equals(movie.getId())))
+                        .limit(limit - allRelatedMovies.size())
+                        .collect(Collectors.toList());
+                
+                allRelatedMovies.addAll(additionalMovies);
+            } catch (Exception e) {
+                log.warn("获取最新电影作为备选失败: {}", e.getMessage());
+            }
+        }
+        
+        // 使用偏移量进行随机选择
+        List<Movie> finalMovies;
+        if (allRelatedMovies.size() >= limit) {
+            int startIndex = (offset % allRelatedMovies.size());
+            int endIndex = Math.min(startIndex + limit, allRelatedMovies.size());
+            finalMovies = allRelatedMovies.subList(startIndex, endIndex);
+        } else {
+            finalMovies = allRelatedMovies;
+        }
+        
+        log.debug("最终获取到 {} 部相关电影", finalMovies.size());
+        
+        return finalMovies.stream()
+                .map(movie -> convertToDetailDTO(movie, null))
                 .collect(Collectors.toList());
     }
     
@@ -820,7 +941,7 @@ public class H5MovieServiceImpl implements IH5MovieService {
     /**
      * 转换为详情DTO
      */
-    private H5MovieDetailDTO convertToDetailDTO(Movie movie) {
+    private H5MovieDetailDTO convertToDetailDTO(Movie movie, Long userId) {
         // 获取封面URL
         String coverUrl = minioService.getFileUrl(movie.getCover());
         
@@ -836,6 +957,25 @@ public class H5MovieServiceImpl implements IH5MovieService {
         
         // 获取文件URL
         String fileUrl = minioService.getFileUrl(movie.getFilePath());
+        
+        // 检查用户是否已购买该电影
+        Boolean isPurchased = null;
+        Boolean isLiked = null;
+        Boolean isFavorited = null;
+        
+        if (userId != null) {
+            isPurchased = hasUserPurchasedMovie(userId, movie.getId());
+            isLiked = checkUserLiked(movie.getId(), userId);
+            isFavorited = userFavoriteService.checkUserFavorited(userId, movie.getId(), "MOVIE");
+        }
+        
+        // 根据购买状态确定收费类型描述
+        String chargeTypeDesc;
+        if (isPurchased != null && isPurchased) {
+            chargeTypeDesc = "已购买";
+        } else {
+            chargeTypeDesc = getChargeTypeDesc(movie.getChargeType().toString());
+        }
         
         return H5MovieDetailDTO.builder()
                 .id(movie.getId())
@@ -860,7 +1000,7 @@ public class H5MovieServiceImpl implements IH5MovieService {
                 .price(movie.getPrice())
                 .trialDuration(movie.getTrialDuration())
                 .chargeType(movie.getChargeType().toString())
-                .chargeTypeDesc(getChargeTypeDesc(movie.getChargeType().toString()))
+                .chargeTypeDesc(chargeTypeDesc)
                 .status(movie.getStatus().toString())
                 .sortOrder(movie.getSortOrder())
                 .isRecommended(movie.getIsRecommended())
@@ -871,6 +1011,9 @@ public class H5MovieServiceImpl implements IH5MovieService {
                 .fileFormat(movie.getFileFormat())
                 .createdAt(movie.getCreatedAt().toString())
                 .updatedAt(movie.getUpdatedAt().toString())
+                .isPurchased(isPurchased)
+                .isLiked(isLiked)
+                .isFavorited(isFavorited)
                 .build();
     }
     
@@ -1018,6 +1161,37 @@ public class H5MovieServiceImpl implements IH5MovieService {
      * @return true if purchased, false otherwise
      */
     private boolean checkMoviePurchase(Long userId, Long movieId) {
-        return moviePurchaseService.hasUserPurchasedMovie(userId, movieId);
+        if (userId == null || movieId == null) {
+            return false;
+        }
+        return userMoviePurchaseRepository.existsByUserIdAndMovieId(userId, movieId);
+    }
+    
+    // ==================== 电影购买功能实现 ====================
+    
+    @Override
+    public boolean hasUserPurchasedMovie(Long userId, Long movieId) {
+        if (userId == null || movieId == null) {
+            return false;
+        }
+        return userMoviePurchaseRepository.existsByUserIdAndMovieId(userId, movieId);
+    }
+    
+    @Override
+    public Page<H5MovieDTO> getUserPurchasedMovies(Long userId, Pageable pageable) {
+        if (userId == null) {
+            return Page.empty(pageable);
+        }
+        
+        Page<UserMoviePurchase> purchases = userMoviePurchaseRepository.findByUserIdOrderByPurchaseTimeDesc(userId, pageable);
+        return purchases.map(purchase -> convertToDTO(purchase.getMovie()));
+    }
+    
+    @Override
+    public List<Long> getUserPurchasedMovieIds(Long userId) {
+        if (userId == null) {
+            return List.of();
+        }
+        return userMoviePurchaseRepository.findMovieIdsByUserId(userId);
     }
 } 

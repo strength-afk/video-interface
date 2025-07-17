@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -29,9 +30,36 @@ public class JacksonConfig {
         // 注册Java 8时间模块
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         
-        // 配置LocalDateTime序列化格式
+        // 配置LocalDateTime序列化和反序列化格式
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+        
+        // 添加支持多种格式的LocalDateTime反序列化器
+        javaTimeModule.addDeserializer(LocalDateTime.class, new com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer(formatter) {
+            @Override
+            public LocalDateTime deserialize(com.fasterxml.jackson.core.JsonParser p, com.fasterxml.jackson.databind.DeserializationContext ctxt) throws java.io.IOException {
+                String value = p.getValueAsString();
+                if (value == null || value.trim().isEmpty()) {
+                    return null;
+                }
+                
+                try {
+                    // 首先尝试ISO格式 (2024-01-01T00:00:00.000Z)
+                    if (value.contains("T")) {
+                        // 移除Z后缀，转换为本地时间
+                        if (value.endsWith("Z")) {
+                            value = value.substring(0, value.length() - 1);
+                        }
+                        return LocalDateTime.parse(value);
+                    }
+                    
+                    // 然后尝试标准格式 (yyyy-MM-dd HH:mm:ss)
+                    return LocalDateTime.parse(value, formatter);
+                } catch (Exception e) {
+                    throw new java.io.IOException("无法解析时间格式: " + value + ", 支持的格式: yyyy-MM-dd HH:mm:ss 或 ISO格式", e);
+                }
+            }
+        });
         
         objectMapper.registerModule(javaTimeModule);
         
