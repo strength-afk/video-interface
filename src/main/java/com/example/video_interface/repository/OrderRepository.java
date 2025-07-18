@@ -105,4 +105,11 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
      * @return 已支付订单数量
      */
     long countByUserIdAndOrderStatus(Long userId, Order.OrderStatus orderStatus);
+    
+    /**
+     * 根据第三方订单号查询订单
+     * @param outNo 第三方订单号
+     * @return 订单信息
+     */
+    Optional<Order> findByOutNo(String outNo);
 } 

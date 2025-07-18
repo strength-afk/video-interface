@@ -6,7 +6,6 @@ import com.example.video_interface.dto.admin.UserStatistics;
 import com.example.video_interface.model.User;
 import com.example.video_interface.repository.UserRepository;
 import com.example.video_interface.service.admin.IAdminUserService;
-import com.example.video_interface.service.common.IUserAutoUnlockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,7 +28,6 @@ import java.util.Map;
 public class AdminUserController {
 
     private final IAdminUserService adminUserService;
-    private final IUserAutoUnlockService userAutoUnlockService;
     private final UserRepository userRepository;
 
     /**
@@ -333,28 +331,6 @@ public class AdminUserController {
             return ResponseEntity.badRequest().body(Map.of(
                 "code", 400,
                 "message", "获取统计信息失败，请稍后重试"
-            ));
-        }
-    }
-    
-    /**
-     * 手动触发用户自动解锁检查
-     * @return 操作结果
-     */
-    @PostMapping("/auto-unlock")
-    public ResponseEntity<?> triggerAutoUnlock() {
-        try {
-            userAutoUnlockService.manualUnlockCheck();
-            log.info("手动触发用户自动解锁检查成功");
-            return ResponseEntity.ok(Map.of(
-                "code", 200,
-                "message", "自动解锁检查已触发"
-            ));
-        } catch (Exception e) {
-            log.error("手动触发用户自动解锁检查失败: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of(
-                "code", 400,
-                "message", "触发自动解锁检查失败，请稍后重试"
             ));
         }
     }

@@ -538,6 +538,91 @@ GET /api/payment/idr/order/info?orderId=your_order_id
 - 回调数据请参考iDataRiver官方文档。
 - 回调时建议主动再次请求订单详情接口，确认订单真实状态。
 
+#### 4.1 回调接口详情
+**接口地址**: `POST /api/payment/idr/order/callback`
+
+**回调事件类型**:
+- `ORDER_COMPLETED`: 订单已完成（支付成功）
+- `ORDER_REFUND`: 订单已退款
+- `UNDEFINED`: 未知事件（不处理）
+
+**回调处理流程**:
+1. **数据验证**: 验证回调数据完整性和事件类型
+2. **订单查询**: 主动调用iDataRiver API查询订单详情，确认真实状态
+3. **本地订单查找**: 根据第三方订单号查找本地订单记录
+4. **状态更新**: 更新本地订单状态为已支付/已退款
+5. **业务处理**: 根据订单类型执行相应业务逻辑
+   - **电影购买**: 创建用户电影购买记录
+   - **VIP购买**: 更新用户VIP状态和到期时间
+   - **充值**: 更新用户账户余额
+6. **退款处理**: 处理退款业务逻辑（删除购买记录、减少余额等）
+
+**安全机制**:
+- 主动查询订单详情确认真实状态，防止恶意回调
+- 检查订单是否已处理，避免重复处理
+- 完整的异常处理和日志记录
+- 事务保证数据一致性
+
+**返回要求**:
+- 必须返回HTTP 200状态码，否则iDataRiver会重试
+- 返回内容: `success`（成功）或 `fail`（失败）
+
+#### 4.2 回调数据示例
+
+**订单完成回调**:
+```json
+{
+  "event": "ORDER_COMPLETED",
+  "orderId": "687621885c04c69a131c995c_1234567890",
+  "timestamp": 1703123456789,
+  "status": "DONE",
+  "amount": 9.90,
+  "currency": "USD"
+}
+```
+
+**订单退款回调**:
+```json
+{
+  "event": "ORDER_REFUND",
+  "orderId": "687621885c04c69a131c995c_1234567890",
+  "timestamp": 1703123456789,
+  "refundAmount": 9.90,
+  "refundReason": "用户申请退款"
+}
+```
+
+#### 4.3 测试回调接口
+
+可以使用以下curl命令测试回调接口：
+
+```bash
+# 测试订单完成回调
+curl -X POST http://localhost:8080/api/payment/idr/order/callback \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "ORDER_COMPLETED",
+    "orderId": "test_order_123",
+    "timestamp": 1703123456789,
+    "status": "DONE",
+    "amount": 9.90,
+    "currency": "USD"
+  }'
+
+# 测试订单退款回调
+curl -X POST http://localhost:8080/api/payment/idr/order/callback \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "ORDER_REFUND",
+    "orderId": "test_order_123",
+    "timestamp": 1703123456789,
+    "refundAmount": 9.90,
+    "refundReason": "测试退款"
+  }'
+```
+
+**注意**: 测试时请确保本地订单表中存在对应的订单记录，否则回调处理会失败。
+
 ### 5. 注意事项
 - 商户密钥（idr.api.secret）严禁前端暴露，所有API调用均在后端完成。
 - 支持所有支付方式，method参数需从订单详情接口获取。

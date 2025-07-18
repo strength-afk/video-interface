@@ -70,4 +70,12 @@ public interface UserMoviePurchaseRepository extends JpaRepository<UserMoviePurc
      */
     @Query("SELECT COUNT(ump) FROM UserMoviePurchase ump WHERE ump.movie.id = :movieId AND ump.status = 'SUCCESS'")
     long countByMovieId(@Param("movieId") Long movieId);
+    
+    /**
+     * 根据用户ID和电影ID删除购买记录
+     * 
+     * @param userId 用户ID
+     * @param movieId 电影ID
+     */
+    void deleteByUserIdAndMovieId(Long userId, Long movieId);
 } 

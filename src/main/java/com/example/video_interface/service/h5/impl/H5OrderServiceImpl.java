@@ -186,7 +186,7 @@ public class H5OrderServiceImpl implements IH5OrderService {
                 .productName(productName)
                 .amount(amount)
                 .orderStatus(Order.OrderStatus.PENDING)
-                .paymentMethod(Order.PaymentMethod.BALANCE) // 临时设置默认值，支付时会更新
+                .paymentMethod(null) // 创建时不赋值
                 .outNo(outNo) // 设置第三方订单号
                 .remark(remark)
                 .build();
@@ -219,6 +219,11 @@ public class H5OrderServiceImpl implements IH5OrderService {
         // 如果状态为已支付，设置支付时间
         if (status == Order.OrderStatus.PAID && order.getPaidTime() == null) {
             order.setPaidTime(LocalDateTime.now());
+        }
+        
+        // 如果不是已支付，清空支付方式
+        if (status != Order.OrderStatus.PAID) {
+            order.setPaymentMethod(null);
         }
         
         Order updatedOrder = orderRepository.save(order);

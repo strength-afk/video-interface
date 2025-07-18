@@ -66,7 +66,7 @@ public class IdrApiClient {
      */
     private HttpHeaders buildHeaders(String locale) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", secret); // 只传密钥本身，不加Bearer
+        headers.set("Authorization", secret);
         if (locale != null && !locale.isEmpty()) {
             headers.set("X-Idr-Locale", locale);
         } else {

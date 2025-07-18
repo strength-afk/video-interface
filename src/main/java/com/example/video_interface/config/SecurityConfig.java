@@ -109,7 +109,8 @@ public class SecurityConfig {
                 auth.requestMatchers("/orders/**").authenticated();
                 
                 // 允许支付相关接口匿名访问
-                auth.requestMatchers("/payment/idr/**").permitAll();
+                auth.requestMatchers("/payment/idr/order/callback").permitAll();
+                auth.requestMatchers("/payment/idr/**").authenticated();
                 
                 
                 // 允许验证码相关的公开端点
